@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HK - Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Zen Maru Gothic', 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(-45deg, #e0c3fc, #8ec5fc, #e0c3fc, #fbc2eb);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+            color: #334155;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* ほわほわ・浮遊アニメーション (Floating) */
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        .float-animation-delayed {
+            animation: float 7s ease-in-out 2s infinite;
+        }
+        .float-animation-slow {
+            animation: float 9s ease-in-out 1s infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(1deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        /* パルス＆発光 (Glow & Soft Pulse) */
+        .soft-glow {
+            box-shadow: 0 8px 32px 0 rgba(168, 85, 247, 0.18), 0 0 20px rgba(255, 255, 255, 0.6);
+        }
+
+        /* グラスモフィズム (Glassmorphism) */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px) scale(1.005);
+            background: rgba(255, 255, 255, 0.78);
+        }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(203, 213, 225, 0.6);
+            transition: all 0.3s ease;
+        }
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #a855f7;
+            box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.15);
+            outline: none;
+        }
+
+        /* ふわっと表示 (Fade-In Animation) */
+        .page-tab {
+            display: none;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .page-tab.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 背景のポワポワバブル */
+        .bubble {
+            position: fixed;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(243,232,255,0.3) 100%);
+            filter: blur(10px);
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen pb-16">
+
+    <!-- 背景のふんわりバブル -->
+    <div class="bubble w-72 h-72 top-10 left-10 float-animation"></div>
+    <div class="bubble w-96 h-96 bottom-10 right-10 float-animation-delayed"></div>
+    <div class="bubble w-64 h-64 top-1/2 left-1/3 float-animation-slow"></div>
+
+    <!-- ヘッダー / ナビゲーション -->
+    <header class="sticky top-0 z-50 glass-nav px-4 lg:px-8 py-3 mb-8 shadow-sm">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- サイトロゴ -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home')">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center text-white font-bold text-xl shadow-md float-animation">
+                    HK
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
+                        HK - Portal
+                    </h1>
+                    <p class="text-xs text-slate-500 font-medium">ポータル ＆ 共有プラットフォーム</p>
+                </div>
+            </div>
+
+            <!-- ナビゲーションタブ -->
+            <nav class="flex flex-wrap items-center justify-center gap-1 sm:gap-2">
+                <button onclick="switchTab('home')" id="nav-home" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all duration-300 bg-purple-500 text-white shadow-sm">
+                    <i data-lucide="home" class="w-4 h-4"></i> ホーム
+                </button>
+                <button onclick="switchTab('files')" id="nav-files" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-600 hover:bg-white/60 transition-all duration-300">
+                    <i data-lucide="file-text" class="w-4 h-4"></i> ファイル受け渡し
+                </button>
+                <button onclick="switchTab('news')" id="nav-news" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-600 hover:bg-white/60 transition-all duration-300">
+                    <i data-lucide="bell" class="w-4 h-4"></i> お知らせ
+                </button>
+                <button onclick="switchTab('security')" id="nav-security" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-600 hover:bg-white/60 transition-all duration-300">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i> セキュリティ学習
+                </button>
+                <button onclick="switchTab('roles')" id="nav-roles" class="nav-btn hidden px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-600 hover:bg-white/60 transition-all duration-300">
+                    <i data-lucide="users" class="w-4 h-4 text-purple-600"></i> ロール・権限管理
+                </button>
+                <button onclick="switchTab('suggestions')" id="nav-suggestions" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-600 hover:bg-white/60 transition-all duration-300">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i> 追加推奨機能
+                </button>
+            </nav>
+
+            <!-- ログイン状態・ユーザーエリア -->
+            <div class="flex items-center gap-3">
+                <div id="user-status-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+                    <span class="w-2 h-2 rounded-full bg-slate-400"></span> ゲスト閲覧中
+                </div>
+                <button id="signup-btn" onclick="openSignupModal()" class="px-3 py-2 text-xs font-semibold rounded-xl bg-white text-purple-600 hover:bg-purple-50 border border-purple-200 shadow-sm transition">
+                    招待登録
+                </button>
+                <button id="auth-action-btn" onclick="openLoginModal()" class="px-4 py-2 text-xs font-semibold rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:opacity-90 shadow-sm transition">
+                    ログイン
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツエリア -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+        <!-- ==================== TAB 1: HOME ==================== -->
+        <section id="tab-home" class="page-tab active space-y-8">
+            <!-- ヒーローセクション -->
+            <div class="glass-card soft-glow p-8 md:p-12 text-center relative overflow-hidden">
+                <div class="max-w-2xl mx-auto space-y-4">
+                    <span class="inline-block px-4 py-1.5 rounded-full bg-purple-100 text-purple-700 text-xs font-bold tracking-wide uppercase float-animation">
+                        ✨ Welcome to HK - Portal
+                    </span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-slate-800 leading-tight">
+                        安全でシンプルな<br><span class="text-purple-600">ファイル共有 ＆ 情報拠点</span>
+                    </h2>
+                    <p class="text-slate-600 text-sm md:text-base leading-relaxed">
+                        Cloudflare Pages上で動作するセキュアなポータルです。<br>OneDrive連携によるWord等のファイル受け渡し、お知らせ更新、サイバー攻撃学習を行えます。
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-4 pt-4">
+                        <button onclick="switchTab('files')" class="px-6 py-3 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm shadow-lg shadow-purple-200 transition">
+                            ファイルを共有する
+                        </button>
+                        <button onclick="switchTab('security')" class="px-6 py-3 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-sm border border-slate-200 transition">
+                            サイバー攻撃デモを試す
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ショートカットカード (4列) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div onclick="switchTab('files')" class="glass-card p-6 cursor-pointer group float-animation">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i data-lucide="cloud-cog" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-800 mb-1">OneDrive ファイル受け渡し</h3>
+                    <p class="text-xs text-slate-500">C方式(外部ストレージ連携)による高容量ファイル保存 (要ログイン)</p>
+                </div>
+
+                <div onclick="switchTab('news')" class="glass-card p-6 cursor-pointer group float-animation-delayed">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i data-lucide="megaphone" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-800 mb-1">お知らせ一覧</h3>
+                    <p class="text-xs text-slate-500">最新情報・連絡事項の確認。管理者用編集機能付き。</p>
+                </div>
+
+                <div onclick="switchTab('security')" class="glass-card p-6 cursor-pointer group float-animation-slow">
+                    <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i data-lucide="shield-alert" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-800 mb-1">セキュリティ学習</h3>
+                    <p class="text-xs text-slate-500">SQLiやXSS等の攻撃体験デモと対策のインタラクティブ解説。</p>
+                </div>
+
+                <div onclick="switchTab('suggestions')" class="glass-card p-6 cursor-pointer group float-animation">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i data-lucide="lightbulb" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-800 mb-1">追加推奨機能</h3>
+                    <p class="text-xs text-slate-500">Cloudflare開発で今後追加すべき機能の提案・要件確認。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 2: FILE TRANSFER ==================== -->
+        <section id="tab-files" class="page-tab space-y-6">
+            <div class="glass-card p-6 md:p-8">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-slate-200/60 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="folder-git-2" class="text-purple-600"></i> Word / ファイル受け渡し (OneDrive C方式連携)
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">※ ファイルの送信および受け取りには招待承認されたアカウントでのログインが必要です。</p>
+                    </div>
+                    <div id="file-auth-warning" class="hidden text-xs bg-amber-50 text-amber-700 px-3 py-2 rounded-xl border border-amber-200 flex items-center gap-2">
+                        <i data-lucide="lock" class="w-4 h-4"></i> ログインしていないため閲覧限定モードです
+                    </div>
+                </div>
+
+                <!-- ファイルアップロードエリア (要ログイン) -->
+                <div id="upload-zone" class="border-2 border-dashed border-purple-300 hover:border-purple-500 rounded-2xl p-8 text-center bg-purple-50/40 transition cursor-pointer mb-8">
+                    <input type="file" id="file-input" class="hidden" onchange="handleFileUpload(event)">
+                    <div onclick="triggerFileInput()" class="space-y-3">
+                        <div class="w-16 h-16 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mx-auto float-animation">
+                            <i data-lucide="cloud-upload" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-700">クリックしてファイルを選択（Microsoft Graph API経由でOneDriveへ保存）</h3>
+                        <p class="text-xs text-slate-400">Word (.docx, .doc), PDF, ZIP など (最大 500MB)</p>
+                    </div>
+                </div>
+
+                <!-- アップロード済みファイル一覧 -->
+                <h3 class="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
+                    <i data-lucide="files" class="w-5 h-5 text-indigo-500"></i> 共有中ファイル一覧
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-600">
+                        <thead class="bg-slate-100/70 text-slate-700 uppercase text-xs font-semibold rounded-lg">
+                            <tr>
+                                <th class="p-3 rounded-l-xl">ファイル名</th>
+                                <th class="p-3">種類</th>
+                                <th class="p-3">サイズ</th>
+                                <th class="p-3">保存先</th>
+                                <th class="p-3">投稿者</th>
+                                <th class="p-3 text-right rounded-r-xl">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="file-list-tbody" class="divide-y divide-slate-100">
+                            <!-- JSで可動描画 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 3: ANNOUNCEMENTS ==================== -->
+        <section id="tab-news" class="page-tab space-y-6">
+            <div class="glass-card p-6 md:p-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-200/60 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="bell" class="text-amber-500"></i> お知らせ
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">ポータルの最新情報・重要通知</p>
+                    </div>
+                    <button id="add-news-btn" onclick="openNewsModal()" class="hidden px-4 py-2 rounded-xl bg-purple-600 text-white font-semibold text-xs flex items-center gap-2 shadow-sm hover:bg-purple-700 transition">
+                        <i data-lucide="plus" class="w-4 h-4"></i> お知らせを追加 (管理者)
+                    </button>
+                </div>
+
+                <div id="news-admin-badge" class="hidden mb-6 p-3 rounded-xl bg-purple-50 border border-purple-200 text-purple-700 text-xs flex items-center gap-2">
+                    <i data-lucide="check-circle-2" class="w-4 h-4"></i> 管理者としてログイン中：お知らせの編集・新規投稿が可能です。
+                </div>
+
+                <div id="news-container" class="space-y-4">
+                    <!-- JS描画 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 4: CYBER SECURITY LEARNING ==================== -->
+        <section id="tab-security" class="page-tab space-y-8">
+            <div class="glass-card p-6 md:p-8">
+                <div class="mb-6 border-b border-slate-200/60 pb-4">
+                    <div class="flex items-center gap-2">
+                        <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">誰でもアクセス可能</span>
+                        <span class="px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-bold">インタラクティブ学習</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800 mt-2 flex items-center gap-2">
+                        <i data-lucide="shield-alert" class="text-rose-500"></i> サイバー攻撃デモ ＆ セキュリティ学習
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">Webサイトに潜む脆弱性の仕組みと防衛プログラミングを学びます。</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- SQLi -->
+                    <div class="bg-white/70 rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                <i data-lucide="database" class="w-5 h-5 text-purple-500"></i> SQLインジェクション体験
+                            </h3>
+                            <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded font-medium">危険度: 高</span>
+                        </div>
+                        <p class="text-xs text-slate-600">入力フォームに意図しないSQLコードを注入し、認証を突破する攻撃デモです。</p>
+
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-xs font-bold text-slate-600 block mb-1">ユーザー名入力:</label>
+                                <input type="text" id="sqli-input-user" value="' OR '1'='1" class="w-full text-xs p-2.5 rounded-xl glass-input font-mono">
+                            </div>
+                            <button onclick="runSqliDemo()" class="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition">
+                                ログイン実行 (デモ)
+                            </button>
+                        </div>
+                        <div id="sqli-result" class="p-3 rounded-xl text-xs hidden"></div>
+                    </div>
+
+                    <!-- XSS -->
+                    <div class="bg-white/70 rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                <i data-lucide="code" class="w-5 h-5 text-indigo-500"></i> XSS (クロスサイトスクリプティング)
+                            </h3>
+                            <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-medium">危険度: 中〜高</span>
+                        </div>
+                        <p class="text-xs text-slate-600">悪意あるJavaScriptコードを投稿し、画面で実行させる攻撃デモです。</p>
+
+                        <div class="space-y-3">
+                            <input type="text" id="xss-input" value="<script>alert('XSS攻撃成功!')</script>" class="w-full text-xs p-2.5 rounded-xl glass-input font-mono">
+                            <div class="flex gap-2">
+                                <button onclick="runXssDemo(false)" class="flex-1 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition">対策なし出力</button>
+                                <button onclick="runXssDemo(true)" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition">エスケープ出力</button>
+                            </div>
+                        </div>
+                        <div class="bg-slate-100 p-3 rounded-xl min-h-[50px]">
+                            <div id="xss-output" class="text-xs text-slate-800 font-sans"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 5: ROLE MANAGEMENT (ADMIN ONLY) ==================== -->
+        <section id="tab-roles" class="page-tab space-y-6">
+            <div class="glass-card p-6 md:p-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-200/60 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="shield-check" class="text-purple-600"></i> ユーザー権限・カスタムロール管理 (管理者専用)
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">デフォルトの「管理者」「一般」以外の新しい権限ロールを自由に作成・割り当てできます。</p>
+                    </div>
+                    <button onclick="openRoleModal()" class="px-4 py-2 rounded-xl bg-purple-600 text-white font-semibold text-xs flex items-center gap-2 shadow-sm hover:bg-purple-700 transition">
+                        <i data-lucide="plus" class="w-4 h-4"></i> 新しいロールを作成
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="roles-grid">
+                    <!-- JS描画 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 6: SUGGESTIONS ==================== -->
+        <section id="tab-suggestions" class="page-tab space-y-6">
+            <div class="glass-card p-6 md:p-8">
+                <div class="mb-6 border-b border-slate-200/60 pb-4">
+                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                        <i data-lucide="sparkles" class="text-amber-500"></i> 追加推奨機能一覧
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">HK - Portalの今後のおすすめ拡張構成機能です。</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-5 rounded-2xl bg-white/70 border border-slate-200/80 shadow-sm space-y-2">
+                        <h3 class="font-bold text-purple-700 text-sm flex items-center gap-2"><i data-lucide="cloud-cog" class="w-4 h-4"></i> OneDrive C方式API自動連携</h3>
+                        <p class="text-xs text-slate-600">Microsoft Graph API連携により最大500MBのファイルをWorkers経由で自動転送・受取可能にする仕様。</p>
+                    </div>
+                    <div class="p-5 rounded-2xl bg-white/70 border border-slate-200/80 shadow-sm space-y-2">
+                        <h3 class="font-bold text-indigo-700 text-sm flex items-center gap-2"><i data-lucide="key" class="w-4 h-4"></i> 招待コード自動発行システム</h3>
+                        <p class="text-xs text-slate-600">管理者が1回使い切りの招待キーを生成し、メール送信でワンクリック登録を可能にする機能。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- モーダル: ログイン -->
+    <div id="login-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-md w-full p-6 space-y-6 bg-white/90">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-xl text-slate-800 flex items-center gap-2">
+                    <i data-lucide="log-in" class="text-purple-600"></i> ログイン
+                </h3>
+                <button onclick="closeLoginModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-slate-600 block mb-1">ユーザー名</label>
+                    <input type="text" id="login-user" required placeholder="admin または user" class="w-full text-sm p-3 rounded-xl glass-input">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-600 block mb-1">パスワード</label>
+                    <input type="password" id="login-pass" required placeholder="••••••••" class="w-full text-sm p-3 rounded-xl glass-input">
+                </div>
+                <div class="text-xs text-slate-500 bg-purple-50 p-3 rounded-xl">
+                    💡 <b>テスト用ログイン:</b><br>
+                    - 管理者: ユーザー名 <code>admin</code><br>
+                    - 一般ユーザー: ユーザー名 <code>user</code>
+                </div>
+                <button type="submit" class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm shadow-md transition">
+                    ログインする
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- モーダル: 招待・承認制サインアップ -->
+    <div id="signup-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-md w-full p-6 space-y-6 bg-white/90">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-xl text-slate-800 flex items-center gap-2">
+                    <i data-lucide="user-plus" class="text-purple-600"></i> 招待アカウント作成
+                </h3>
+                <button onclick="closeSignupModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <form onsubmit="handleSignup(event)" class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-slate-600 block mb-1">招待コード (Invitation Code)</label>
+                    <input type="text" id="signup-code" required placeholder="例: HK-INVITE-2026" class="w-full text-sm p-3 rounded-xl glass-input border-purple-300">
+                    <p class="text-[10px] text-slate-400 mt-1">※ 管理者から発行された招待コードを入力してください。</p>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-600 block mb-1">希望ユーザー名</label>
+                    <input type="text" id="signup-user" required placeholder="new_user" class="w-full text-sm p-3 rounded-xl glass-input">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-600 block mb-1">パスワード</label>
+                    <input type="password" id="signup-pass" required placeholder="••••••••" class="w-full text-sm p-3 rounded-xl glass-input">
+                </div>
+                <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-bold text-sm shadow-md transition">
+                    登録申請を送信
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- モーダル: お知らせ作成 -->
+    <div id="news-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-lg w-full p-6 space-y-6 bg-white/90">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-xl text-slate-800 flex items-center gap-2"><i data-lucide="plus-circle" class="text-purple-600"></i> お知らせ投稿</h3>
+                <button onclick="closeNewsModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="handleCreateNews(event)" class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-slate-600 block mb-1">タイトル</label>
+                    <input type="text" id="news-title-input" required class="w-full text-sm p-3 rounded-xl glass-input">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-600 block mb-1">本文</label>
+                    <textarea id="news-content-input" rows="4" required class="w-full text-sm p-3 rounded-xl glass-input"></textarea>
+                </div>
+                <button type="submit" class="w-full py-3 rounded-xl bg-purple-600 text-white font-bold text-sm shadow-md">投稿する</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ロジック Script -->
+    <script>
+        let currentUser = null;
+
+        let rolesList = [
+            { name: '管理者 (Admin)', desc: '全設定の追加・変更・削除、全ファイル操作が可能', isDefault: true },
+            { name: '一般ユーザー (User)', desc: '招待された正規メンバー。ファイル受取・アップロードが可能', isDefault: true },
+            { name: '閲覧専用ゲスト', desc: 'ファイルダウンロードのみ可能、投稿は不可', isDefault: false }
+        ];
+
+        let filesList = [
+            { id: 1, name: '【最新版】業務引継ぎ要領書.docx', type: 'Word', size: '4.2 MB', storage: 'OneDrive API', author: 'HK 管理者' },
+            { id: 2, name: 'プロジェクト要件定義_2026.pdf', type: 'PDF', size: '12.1 MB', storage: 'OneDrive API', author: 'HK スタッフ' }
+        ];
+
+        let newsList = [
+            { id: 1, title: 'HK - Portal を Cloudflare Pages ＋ OneDrive 連携で開設しました', date: '2026-11-06', category: '重要', author: '管理者', content: '新しいポータルサイト「HK - Portal」へようこそ。ファイル共有やお知らせ確認、セキュリティ学習が可能です。' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderFileList();
+            renderNewsList();
+            renderRolesList();
+            updateAuthUI();
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.page-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-purple-500', 'text-white', 'shadow-sm');
+                btn.classList.add('text-slate-600');
+            });
+
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            if (activeTab) activeTab.classList.add('active');
+
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.classList.remove('text-slate-600');
+                activeNav.classList.add('bg-purple-500', 'text-white', 'shadow-sm');
+            }
+        }
+
+        function openLoginModal() { document.getElementById('login-modal').classList.remove('hidden'); }
+        function closeLoginModal() { document.getElementById('login-modal').classList.add('hidden'); }
+        function openSignupModal() { document.getElementById('signup-modal').classList.remove('hidden'); }
+        function closeSignupModal() { document.getElementById('signup-modal').classList.add('hidden'); }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-user').value.trim();
+            const role = (username.toLowerCase() === 'admin') ? 'admin' : 'user';
+
+            currentUser = { name: username, role: role };
+            closeLoginModal();
+            updateAuthUI();
+            renderFileList();
+            renderNewsList();
+        }
+
+        function handleSignup(e) {
+            e.preventDefault();
+            const code = document.getElementById('signup-code').value.trim();
+            if (code !== 'HK-INVITE-2026' && code !== 'admin') {
+                alert('無効な招待コードです。管理者から正しいコードを取得してください。');
+                return;
+            }
+            alert('招待コードが承認されました！アカウントの作成が完了しました。');
+            closeSignupModal();
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            updateAuthUI();
+            renderFileList();
+            renderNewsList();
+        }
+
+        function updateAuthUI() {
+            const badge = document.getElementById('user-status-badge');
+            const authBtn = document.getElementById('auth-action-btn');
+            const signupBtn = document.getElementById('signup-btn');
+            const fileWarning = document.getElementById('file-auth-warning');
+            const newsAdminBadge = document.getElementById('news-admin-badge');
+            const addNewsBtn = document.getElementById('add-news-btn');
+            const navRoles = document.getElementById('nav-roles');
+
+            if (currentUser) {
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> ${currentUser.name} (${currentUser.role === 'admin' ? '管理者' : '一般'})`;
+                authBtn.textContent = 'ログアウト';
+                authBtn.onclick = handleLogout;
+                signupBtn.classList.add('hidden');
+                fileWarning.classList.add('hidden');
+
+                if (currentUser.role === 'admin') {
+                    newsAdminBadge.classList.remove('hidden');
+                    addNewsBtn.classList.remove('hidden');
+                    navRoles.classList.remove('hidden');
+                } else {
+                    newsAdminBadge.classList.add('hidden');
+                    addNewsBtn.classList.add('hidden');
+                    navRoles.classList.add('hidden');
+                }
+            } else {
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-400"></span> ゲスト閲覧中`;
+                authBtn.textContent = 'ログイン';
+                authBtn.onclick = openLoginModal;
+                signupBtn.classList.remove('hidden');
+                fileWarning.classList.remove('hidden');
+                newsAdminBadge.classList.add('hidden');
+                addNewsBtn.classList.add('hidden');
+                navRoles.classList.add('hidden');
+            }
+        }
+
+        function renderFileList() {
+            const tbody = document.getElementById('file-list-tbody');
+            tbody.innerHTML = '';
+            filesList.forEach(file => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-white/40 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-slate-800 flex items-center gap-2">
+                        <i data-lucide="file-text" class="w-4 h-4 text-purple-500"></i> ${file.name}
+                    </td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded bg-purple-100 text-purple-700 text-xs">${file.type}</span></td>
+                    <td class="p-3 text-xs text-slate-500">${file.size}</td>
+                    <td class="p-3 text-xs font-bold text-indigo-600">${file.storage}</td>
+                    <td class="p-3 text-xs">${file.author}</td>
+                    <td class="p-3 text-right">
+                        ${currentUser ? 
+                            `<button onclick="alert('${file.name} をOneDriveから取得中...')"` + 
+                            ` class="px-3 py-1.5 rounded-xl bg-purple-600 text-white hover:bg-purple-700 text-xs font-bold transition flex items-center gap-1 ml-auto">` +
+                            `<i data-lucide="download" class="w-3 h-3"></i> 受け取る</button>` : 
+                            `<button onclick="openLoginModal()"` + 
+                            ` class="px-3 py-1.5 rounded-xl bg-slate-200 text-slate-500 text-xs font-bold transition flex items-center gap-1 ml-auto">` +
+                            `<i data-lucide="lock" class="w-3 h-3"></i> 要ログイン</button>`
+                        }
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        function triggerFileInput() {
+            if (!currentUser) {
+                alert('ファイル送信にはログインが必要です。');
+                openLoginModal();
+                return;
+            }
+            document.getElementById('file-input').click();
+        }
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            filesList.unshift({
+                id: Date.now(),
+                name: file.name,
+                type: 'ファイル',
+                size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
+                storage: 'OneDrive API',
+                author: currentUser.name
+            });
+            renderFileList();
+            alert(`「${file.name}」をOneDrive経由でアップロード完了しました！`);
+        }
+
+        function renderNewsList() {
+            const container = document.getElementById('news-container');
+            container.innerHTML = '';
+            newsList.forEach(news => {
+                const item = document.createElement('div');
+                item.className = "p-5 rounded-2xl bg-white/70 border border-slate-200/80 shadow-sm space-y-2";
+                item.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-700">${news.category}</span>
+                        <span class="text-xs text-slate-400">${news.date}</span>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-base">${news.title}</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">${news.content}</p>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function openNewsModal() { document.getElementById('news-modal').classList.remove('hidden'); }
+        function closeNewsModal() { document.getElementById('news-modal').classList.add('hidden'); }
+
+        function handleCreateNews(e) {
+            e.preventDefault();
+            newsList.unshift({
+                id: Date.now(),
+                title: document.getElementById('news-title-input').value,
+                category: 'お知らせ',
+                content: document.getElementById('news-content-input').value,
+                date: new Date().toISOString().split('T')[0]
+            });
+            closeNewsModal();
+            renderNewsList();
+        }
+
+        function renderRolesList() {
+            const grid = document.getElementById('roles-grid');
+            grid.innerHTML = '';
+            rolesList.forEach(role => {
+                const card = document.createElement('div');
+                card.className = "p-4 rounded-2xl bg-white/80 border border-slate-200/80 shadow-sm space-y-2";
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-slate-800 text-sm">${role.name}</h4>
+                        ${role.isDefault ? '<span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded">デフォルト</span>' : ''}
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">${role.desc}</p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openRoleModal() {
+            const roleName = prompt('追加したい新しいロール名を入力してください（例: データ管理者）:');
+            if (roleName) {
+                rolesList.push({ name: roleName, desc: 'カスタム作成された権限ロール', isDefault: false });
+                renderRolesList();
+            }
+        }
+
+        function runSqliDemo() {
+            const u = document.getElementById('sqli-input-user').value;
+            const res = document.getElementById('sqli-result');
+            res.classList.remove('hidden');
+            if (u.includes("' OR '1'='1")) {
+                res.className = "p-3 rounded-xl text-xs bg-rose-100 text-rose-800 font-bold border border-rose-300";
+                res.innerHTML = "⚠️ 認証回避に成功: 条件式 '1'='1' によりログインが突破されました！";
+            } else {
+                res.className = "p-3 rounded-xl text-xs bg-slate-100 text-slate-700 border border-slate-300";
+                res.innerHTML = "ℹ️ 通常の検証が行われました。";
+            }
+        }
+
+        function runXssDemo(isSafe) {
+            const input = document.getElementById('xss-input').value;
+            const output = document.getElementById('xss-output');
+            if (isSafe) { output.textContent = input; }
+            else { output.innerHTML = input; }
+        }
+    </script>
+</body>
+</html>
