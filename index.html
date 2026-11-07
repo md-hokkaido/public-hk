@@ -88,9 +88,10 @@
             transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
 
-        /* 画面右上の通知トースト */
+        /* 画面右上の通知トースト（ヘッダーに隠れないよう位置を調整） */
         #toast-notification {
             transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 9999;
         }
     </style>
 </head>
@@ -101,7 +102,7 @@
     <div class="bubble w-96 h-96 bottom-10 right-10 float-animation-delayed"></div>
 
     <!-- 画面右上の通知トースト -->
-    <div id="toast-notification" class="fixed top-6 right-6 z-50 transform translate-x-full opacity-0 glass-card px-5 py-3 shadow-xl border-purple-200 bg-white/95 flex items-center gap-3">
+    <div id="toast-notification" class="fixed top-20 right-6 transform translate-x-full opacity-0 glass-card px-5 py-3 shadow-xl border-purple-200 bg-white/95 flex items-center gap-3">
         <div id="toast-icon" class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-sm">✨</div>
         <div>
             <h4 id="toast-title" class="font-bold text-xs text-slate-800">通知</h4>
@@ -139,7 +140,7 @@
                 </div>
             </div>
 
-            <!-- 1段に収めるためのナビゲーション ＆ 管理者用プルダウン (Control Center) -->
+            <!-- 1段ナビゲーション ＆ Control Center (デザイン統一) -->
             <nav id="main-nav" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
                 <button onclick="switchTab('home', true)" id="nav-home" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 bg-purple-500 text-white shadow-sm shrink-0">
                     <i data-lucide="home" class="w-3.5 h-3.5"></i> ホーム
@@ -154,9 +155,9 @@
                     <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> セキュリティ
                 </button>
 
-                <!-- 管理者専用プルダウンメニュー: Control Center -->
-                <div id="nav-admin-dropdown-container" class="hidden shrink-0">
-                    <select id="control-center-select" onchange="handleControlCenterSelect(this)" class="px-3.5 py-2 rounded-xl text-xs font-bold text-purple-700 bg-purple-100 hover:bg-purple-200 border border-purple-200 outline-none cursor-pointer">
+                <!-- 管理者専用プルダウンメニュー (他のボタンとデザインを完全に統一) -->
+                <div id="nav-admin-dropdown-container" class="hidden shrink-0 relative">
+                    <select id="control-center-select" onchange="handleControlCenterSelect(this)" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-white/60 bg-transparent border-0 outline-none cursor-pointer appearance-none pr-7 transition">
                         <option value="" disabled selected>⚙️ Control Center</option>
                         <option value="admin">👤 ユーザー管理</option>
                         <option value="roles">🛡️ ロール設定</option>
@@ -166,8 +167,8 @@
 
             <!-- ユーザー状態 ＆ ログイン/ログアウト -->
             <div class="flex items-center gap-2.5 shrink-0">
-                <div id="user-status-badge" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
-                    <span class="w-2 h-2 rounded-full bg-slate-400"></span> ゲスト
+                <div id="user-status-badge" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+                    <span class="w-2 h-2 rounded-full bg-slate-400"></span> <span id="user-badge-text">ゲスト</span>
                 </div>
                 <button id="auth-action-btn" onclick="openLoginModal()" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:opacity-90 shadow-sm transition">
                     ログイン
@@ -300,7 +301,7 @@
                         <div class="space-y-3">
                             <div>
                                 <label class="text-xs font-bold text-slate-600 block mb-1">ユーザー名入力:</label>
-                                <input type="text" id="sqli-input-user" value="' OR '1'='1" class="w-full text-xs p-2.5 rounded-xl glass-input font-mono">
+                                <input type="text" id="sqli-input-user" value="' OR '1'='1" class="w-full text-xs p-2.5 rounded-xl glass-input font-mono" autocomplete="off" data-lpignore="true">
                             </div>
                             <button onclick="runSqliDemo()" class="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition">
                                 ログイン実行 (デモ)
@@ -320,7 +321,7 @@
                         <p class="text-xs text-slate-600">悪意あるJavaScriptコードを投稿し、画面で実行させる攻撃デモです。</p>
 
                         <div class="space-y-3">
-                            <input type="text" id="xss-input" value="<script>alert('XSS攻撃成功!')</script>" class="w-full text-xs p-2.5 rounded-xl glass-input font-mono">
+                            <input type="text" id="xss-input" value="<script>alert('XSS攻撃成功!')</script>" class="w-full text-xs p-2.5 rounded-xl glass-input font-mono" autocomplete="off" data-lpignore="true">
                             <div class="flex gap-2">
                                 <button onclick="runXssDemo(false)" class="flex-1 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition">対策なし出力</button>
                                 <button onclick="runXssDemo(true)" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition">エスケープ出力</button>
@@ -373,25 +374,25 @@
                 <!-- 登録フォーム (個別) -->
                 <div class="bg-white/80 p-6 rounded-2xl border border-slate-200 space-y-4">
                     <h3 class="font-bold text-sm text-slate-800">新規ユーザー個別登録</h3>
-                    <form onsubmit="handleRegisterUser(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <form onsubmit="handleRegisterUser(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" autocomplete="off">
                         <div>
                             <label class="text-[11px] font-bold text-slate-600 block mb-1">管理ID</label>
-                            <input type="text" id="reg-admin-id" required class="w-full text-xs p-2.5 rounded-xl glass-input">
+                            <input type="text" id="reg-admin-id" required class="w-full text-xs p-2.5 rounded-xl glass-input" autocomplete="off" data-lpignore="true">
                         </div>
                         <div>
                             <label class="text-[11px] font-bold text-slate-600 block mb-1">姓 / 名 (スペース区切り)</label>
                             <div class="flex gap-2">
-                                <input type="text" id="reg-sei" required placeholder="山田" class="w-1/2 text-xs p-2.5 rounded-xl glass-input">
-                                <input type="text" id="reg-mei" required placeholder="太郎" class="w-1/2 text-xs p-2.5 rounded-xl glass-input">
+                                <input type="text" id="reg-sei" required placeholder="山田" class="w-1/2 text-xs p-2.5 rounded-xl glass-input" autocomplete="off" data-lpignore="true">
+                                <input type="text" id="reg-mei" required placeholder="太郎" class="w-1/2 text-xs p-2.5 rounded-xl glass-input" autocomplete="off" data-lpignore="true">
                             </div>
                         </div>
                         <div>
                             <label class="text-[11px] font-bold text-slate-600 block mb-1">ユーザー名</label>
-                            <input type="text" id="reg-username" required class="w-full text-xs p-2.5 rounded-xl glass-input">
+                            <input type="text" id="reg-username" required class="w-full text-xs p-2.5 rounded-xl glass-input" autocomplete="off" data-lpignore="true">
                         </div>
                         <div>
                             <label class="text-[11px] font-bold text-slate-600 block mb-1">パスワード (大・小・数 8〜20文字)</label>
-                            <input type="password" id="reg-password" required placeholder="Abc12345" class="w-full text-xs p-2.5 rounded-xl glass-input">
+                            <input type="password" id="reg-password" required placeholder="Abc12345" class="w-full text-xs p-2.5 rounded-xl glass-input" autocomplete="new-password" data-lpignore="true">
                         </div>
                         <div class="md:col-span-2 flex items-center gap-3 pt-2">
                             <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
@@ -441,7 +442,7 @@
 
     </main>
 
-    <!-- ログインモーダル -->
+    <!-- ログインモーダル (自動保存抑制) -->
     <div id="login-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="glass-card max-w-md w-full p-6 space-y-6 bg-white/90">
             <div class="flex items-center justify-between">
@@ -449,14 +450,14 @@
                 <button onclick="closeLoginModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             
-            <form onsubmit="handleLogin(event)" class="space-y-4">
+            <form onsubmit="handleLogin(event)" class="space-y-4" autocomplete="off">
                 <div>
                     <label class="text-xs font-bold text-slate-600 block mb-1">ユーザー名</label>
-                    <input type="text" id="login-user" required class="w-full text-sm p-3 rounded-xl glass-input">
+                    <input type="text" id="login-user" required class="w-full text-sm p-3 rounded-xl glass-input" autocomplete="off" data-lpignore="true">
                 </div>
                 <div>
                     <label class="text-xs font-bold text-slate-600 block mb-1">パスワード</label>
-                    <input type="password" id="login-pass" required class="w-full text-sm p-3 rounded-xl glass-input">
+                    <input type="password" id="login-pass" required class="w-full text-sm p-3 rounded-xl glass-input" autocomplete="new-password" data-lpignore="true">
                 </div>
                 <div id="login-error-msg" class="text-xs text-rose-600 font-bold hidden">パスワードが正しくありません</div>
                 <button type="submit" class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm shadow-md transition">
@@ -466,7 +467,7 @@
         </div>
     </div>
 
-    <!-- 管理者パスワード入力モーダル (type="password" に変更して丸見えを防止) -->
+    <!-- 管理者パスワード入力モーダル (自動保存抑制 ＆ マスク) -->
     <div id="admin-pass-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="glass-card max-w-md w-full p-6 space-y-6 bg-white/90">
             <div class="flex items-center justify-between">
@@ -474,9 +475,8 @@
                 <button onclick="closeAdminPassModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <p class="text-xs text-slate-600">管理者ページ（Control Center）にアクセスするにはパスワードを入力してください。</p>
-            <form onsubmit="verifyAdminPassword(event)" class="space-y-4">
-                <!-- type="password" に変更し、入力内容が隠れるように設定 -->
-                <input type="password" id="admin-secret-pass" autocomplete="current-password" required placeholder="パスワードを入力" class="w-full text-sm p-3 rounded-xl glass-input">
+            <form onsubmit="verifyAdminPassword(event)" class="space-y-4" autocomplete="off">
+                <input type="password" id="admin-secret-pass" autocomplete="new-password" data-lpignore="true" required placeholder="パスワードを入力" class="w-full text-sm p-3 rounded-xl glass-input">
                 <div id="admin-pass-error" class="text-xs text-rose-600 font-bold hidden">パスワードが正しくありません</div>
                 <button type="submit" class="w-full py-3 rounded-xl bg-purple-600 text-white font-bold text-sm">認証する</button>
             </form>
@@ -490,15 +490,15 @@
                 <h3 id="news-modal-title" class="font-bold text-xl text-slate-800 flex items-center gap-2"><i data-lucide="plus-circle" class="text-purple-600"></i> お知らせ投稿</h3>
                 <button onclick="closeNewsModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <form onsubmit="handleSaveNews(event)" class="space-y-4">
+            <form onsubmit="handleSaveNews(event)" class="space-y-4" autocomplete="off">
                 <input type="hidden" id="news-edit-id">
                 <div>
                     <label class="text-xs font-bold text-slate-600 block mb-1">カテゴリ</label>
-                    <input type="text" id="news-cat-input" required placeholder="例: 重要, 連絡" class="w-full text-sm p-3 rounded-xl glass-input">
+                    <input type="text" id="news-cat-input" required placeholder="例: 重要, 連絡" class="w-full text-sm p-3 rounded-xl glass-input" autocomplete="off" data-lpignore="true">
                 </div>
                 <div>
                     <label class="text-xs font-bold text-slate-600 block mb-1">タイトル</label>
-                    <input type="text" id="news-title-input" required class="w-full text-sm p-3 rounded-xl glass-input">
+                    <input type="text" id="news-title-input" required class="w-full text-sm p-3 rounded-xl glass-input" autocomplete="off" data-lpignore="true">
                 </div>
                 <div>
                     <label class="text-xs font-bold text-slate-600 block mb-1">本文</label>
@@ -597,7 +597,6 @@
             const activeNav = document.getElementById(`nav-${targetTab}`);
             if (activeNav) activeNav.classList.add('bg-purple-500', 'text-white', 'shadow-sm');
 
-            // 管理者タブ（roles / admin）が開いている場合はプルダウン側を選択状態にする
             const ccSelect = document.getElementById('control-center-select');
             if (targetTab === 'roles' || targetTab === 'admin') {
                 if (ccSelect) ccSelect.value = targetTab;
@@ -611,7 +610,6 @@
             }
         }
 
-        // Control Center（プルダウン）の変更ハンドラ
         function handleControlCenterSelect(select) {
             const val = select.value;
             if (val) {
@@ -707,6 +705,7 @@
 
         function updateAuthUI() {
             const badge = document.getElementById('user-status-badge');
+            const badgeText = document.getElementById('user-badge-text');
             const authBtn = document.getElementById('auth-action-btn');
             const navAdminDropdown = document.getElementById('nav-admin-dropdown-container');
             const featureCards = document.getElementById('home-feature-cards');
@@ -717,7 +716,8 @@
             if (currentUser) {
                 const userRolesText = currentUser.roles ? currentUser.roles.join(', ') : '一般';
                 badge.classList.remove('hidden');
-                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> ${currentUser.sei} ${currentUser.mei} (${userRolesText})`;
+                badge.classList.add('flex');
+                badgeText.textContent = `${currentUser.sei} ${currentUser.mei} ${userRolesText}`; // 括弧を削除
                 authBtn.textContent = 'ログアウト';
                 authBtn.onclick = handleLogout;
                 
@@ -725,7 +725,6 @@
                 homeNewsSection.classList.remove('hidden');
                 homeSubtitle.textContent = 'ログイン中のアカウントですべての機能・ファイル共有・お知らせを利用可能です。';
 
-                // 管理者権限の場合のみ Control Center（プルダウン）を表示
                 if (currentUser.neverLock || hasRole(currentUser, 'admin')) {
                     navAdminDropdown.classList.remove('hidden');
                 } else {
@@ -738,7 +737,10 @@
                     addNewsBtn.classList.add('hidden');
                 }
             } else {
+                // ログアウト時は完全に非表示・初期状態に戻す
+                badge.classList.remove('flex');
                 badge.classList.add('hidden');
+                badgeText.textContent = 'ゲスト';
                 authBtn.textContent = 'ログイン';
                 authBtn.onclick = openLoginModal;
 
@@ -751,7 +753,7 @@
             renderNewsList();
         }
 
-        let pendingAdminTarget = 'admin'; // 認証成功後に遷移する先 ('admin' or 'roles')
+        let pendingAdminTarget = 'admin';
 
         function requestAdminAccess(target = 'admin') {
             pendingAdminTarget = target;
