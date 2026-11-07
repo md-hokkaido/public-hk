@@ -105,7 +105,7 @@
         }
 
         /* -------------------------------------- */
-        /* 境界線完全消去 ＆ ふわっと分割ローダー   */
+        /* 縦分割線完全削除 ＆ 極上ふわっとローダー */
         /* -------------------------------------- */
         #page-loader {
             position: fixed;
@@ -115,21 +115,28 @@
             align-items: center;
             justify-content: center;
             pointer-events: auto;
+            overflow: hidden;
             transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        /* 左右に分割して開く背景パネル（中央線を無くすためオーバーラップ＋シャドウ除去） */
+        /* 左右パネル（幅52%＋オーバーラップ＋マージン補正で中央の線・隙間を完全排除） */
         .loader-bg-panel {
             position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 51%; /* 1%重ねて隙間（分割線）を物理的に排除 */
+            top: -5vh;
+            bottom: -5vh;
+            width: 52%;
             background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 50%, #fbc2eb 100%);
             transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1);
             z-index: 1;
         }
-        .loader-bg-left { left: 0; }
-        .loader-bg-right { right: 0; }
+        .loader-bg-left { 
+            left: 0; 
+            margin-right: -10px;
+        }
+        .loader-bg-right { 
+            right: 0; 
+            margin-left: -10px;
+        }
 
         /* 中央のコンテンツ領域 */
         .loader-content {
@@ -139,7 +146,7 @@
             flex-direction: column;
             align-items: center;
             gap: 2.5rem;
-            transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
+            transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease, filter 0.8s ease;
         }
 
         .cyber-logo-wrapper {
@@ -222,19 +229,19 @@
             transition: width 3s cubic-bezier(0.1, 0.85, 0.25, 1);
         }
 
-        /* 迫り出し ＆ ふわっと分解・消滅アニメーション */
+        /* 迫り出し ＆ ふわっと消失アニメーション */
         #page-loader.loader-zoom .loader-content {
             transform: scale(7) translateZ(0);
             opacity: 0;
-            filter: blur(8px); /* ふわっと感のためのブラー */
+            filter: blur(10px);
         }
         #page-loader.loader-split .loader-bg-left {
-            transform: translateX(-100%);
-            opacity: 0; /* ふわっと消えるように透過を追加 */
+            transform: translateX(-105%);
+            opacity: 0;
         }
         #page-loader.loader-split .loader-bg-right {
-            transform: translateX(100%);
-            opacity: 0; /* ふわっと消えるように透過を追加 */
+            transform: translateX(105%);
+            opacity: 0;
         }
         #page-loader.loader-done {
             display: none;
