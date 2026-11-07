@@ -88,10 +88,23 @@
             transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
 
-        /* 画面右上の通知トースト（ヘッダーに隠れないよう位置を調整） */
         #toast-notification {
             transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
             z-index: 9999;
+        }
+
+        /* カスタムドロップダウンメニュー用スタイル */
+        .custom-dropdown-menu {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px);
+            transition: all 0.2s ease;
+        }
+        .custom-dropdown-container:hover .custom-dropdown-menu,
+        .custom-dropdown-container.open .custom-dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
         }
     </style>
 </head>
@@ -140,8 +153,8 @@
                 </div>
             </div>
 
-            <!-- 1段ナビゲーション ＆ Control Center (デザイン統一) -->
-            <nav id="main-nav" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+            <!-- 1段ナビゲーション ＆ カスタムデザインの Control Center メニュー -->
+            <nav id="main-nav" class="flex items-center gap-1.5 overflow-x-visible py-1">
                 <button onclick="switchTab('home', true)" id="nav-home" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 bg-purple-500 text-white shadow-sm shrink-0">
                     <i data-lucide="home" class="w-3.5 h-3.5"></i> ホーム
                 </button>
@@ -155,20 +168,27 @@
                     <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> セキュリティ
                 </button>
 
-                <!-- 管理者専用プルダウンメニュー (他のボタンとデザインを完全に統一) -->
-                <div id="nav-admin-dropdown-container" class="hidden shrink-0 relative">
-                    <select id="control-center-select" onchange="handleControlCenterSelect(this)" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-white/60 bg-transparent border-0 outline-none cursor-pointer appearance-none pr-7 transition">
-                        <option value="" disabled selected>⚙️ Control Center</option>
-                        <option value="admin">👤 ユーザー管理</option>
-                        <option value="roles">🛡️ ロール設定</option>
-                    </select>
+                <!-- 管理者専用カスタムプルダウン (デザインを全体と完全統一) -->
+                <div id="nav-admin-dropdown-container" class="hidden shrink-0 relative custom-dropdown-container">
+                    <button id="nav-control-center-btn" class="nav-btn px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 text-slate-600 hover:bg-white/60 cursor-pointer">
+                        <i data-lucide="settings" class="w-3.5 h-3.5 text-purple-600"></i> Control Center <i data-lucide="chevron-down" class="w-3 h-3 opacity-60"></i>
+                    </button>
+                    <!-- ドロップダウンメニューのカードデザイン -->
+                    <div class="custom-dropdown-menu absolute left-0 mt-1 w-44 glass-card p-1.5 shadow-xl border-white/80 bg-white/90 z-50 space-y-1">
+                        <button onclick="requestAdminAccess('admin')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2 transition">
+                            <i data-lucide="users" class="w-3.5 h-3.5 text-purple-600"></i> ユーザー管理
+                        </button>
+                        <button onclick="requestAdminAccess('roles')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2 transition">
+                            <i data-lucide="shield" class="w-3.5 h-3.5 text-purple-600"></i> ロール設定
+                        </button>
+                    </div>
                 </div>
             </nav>
 
             <!-- ユーザー状態 ＆ ログイン/ログアウト -->
             <div class="flex items-center gap-2.5 shrink-0">
                 <div id="user-status-badge" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
-                    <span class="w-2 h-2 rounded-full bg-slate-400"></span> <span id="user-badge-text">ゲスト</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> <span id="user-badge-text"></span>
                 </div>
                 <button id="auth-action-btn" onclick="openLoginModal()" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:opacity-90 shadow-sm transition">
                     ログイン
@@ -196,7 +216,7 @@
                 </div>
             </div>
 
-            <!-- お知らせ一覧ブロック (ログイン時のみ表示) -->
+            <!-- お知らせ一覧ブロック -->
             <div id="home-news-section" class="hidden glass-card p-6 md:p-8 space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-200/60 pb-3">
                     <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
@@ -204,12 +224,10 @@
                     </h3>
                     <button onclick="switchTab('news', true)" class="text-xs font-bold text-purple-600 hover:underline">すべて見る →</button>
                 </div>
-                <div id="home-news-preview" class="space-y-3">
-                    <!-- JS描画 -->
-                </div>
+                <div id="home-news-preview" class="space-y-3"></div>
             </div>
 
-            <!-- ログイン後に表示される機能ショートカットカード群 -->
+            <!-- 機能ショートカットカード群 -->
             <div id="home-feature-cards" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div onclick="switchTab('files', true)" class="glass-card p-6 cursor-pointer group float-animation">
                     <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition">
@@ -243,12 +261,10 @@
                 <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2 mb-4">
                     <i data-lucide="folder-git-2" class="text-purple-600"></i> ファイル受け渡し
                 </h2>
-                <div id="upload-zone" class="border-2 border-dashed border-purple-300 rounded-2xl p-8 text-center bg-purple-50/40 cursor-pointer mb-6" onclick="triggerFileInput()">
-                    <input type="file" id="file-input" class="hidden" onchange="handleFileSelect(event)">
-                    <p id="upload-label-text" class="font-bold text-slate-700">クリックしてファイルを選択（Google Driveへ送信）</p>
+                <div id="upload-zone" class="border-2 border-dashed border-purple-300 rounded-2xl p-8 text-center bg-purple-50/40 cursor-pointer mb-6">
+                    <p class="font-bold text-slate-700">クリックしてファイルを選択（Google Driveへ送信）</p>
                 </div>
-                <button id="submit-upload-btn" onclick="executeUpload()" disabled class="w-full py-3 rounded-xl bg-purple-600 text-white font-bold text-sm disabled:bg-slate-300">アップロード</button>
-                <div id="upload-status-msg" class="hidden mt-4 p-3 rounded-xl text-xs font-semibold"></div>
+                <button id="submit-upload-btn" onclick="executeUpload()" class="w-full py-3 rounded-xl bg-purple-600 text-white font-bold text-sm shadow">アップロード</button>
             </div>
         </section>
 
@@ -267,9 +283,7 @@
                     </button>
                 </div>
 
-                <div id="news-container" class="space-y-4">
-                    <!-- JS描画 -->
-                </div>
+                <div id="news-container" class="space-y-4"></div>
             </div>
         </section>
 
@@ -277,148 +291,49 @@
         <section id="tab-security" class="page-tab space-y-8">
             <div class="glass-card p-6 md:p-8">
                 <div class="mb-6 border-b border-slate-200/60 pb-4">
-                    <div class="flex items-center gap-2">
-                        <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">誰でもアクセス可能</span>
-                        <span class="px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-bold">インタラクティブ学習</span>
-                    </div>
-                    <h2 class="text-2xl font-bold text-slate-800 mt-2 flex items-center gap-2">
+                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
                         <i data-lucide="shield-alert" class="text-rose-500"></i> サイバー攻撃デモ ＆ セキュリティ学習
                     </h2>
-                    <p class="text-xs text-slate-500 mt-1">Webサイトに潜む脆弱性の仕組みと防衛プログラミングを学びます。</p>
                 </div>
-
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <!-- SQLi -->
                     <div class="bg-white/70 rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
-                        <div class="flex items-center justify-between">
-                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                                <i data-lucide="database" class="w-5 h-5 text-purple-500"></i> SQLインジェクション体験
-                            </h3>
-                            <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded font-medium">危険度: 高</span>
-                        </div>
-                        <p class="text-xs text-slate-600">入力フォームに意図しないSQLコードを注入し、認証を突破する攻撃デモです。</p>
-
-                        <div class="space-y-3">
-                            <div>
-                                <label class="text-xs font-bold text-slate-600 block mb-1">ユーザー名入力:</label>
-                                <input type="text" id="sqli-input-user" value="' OR '1'='1" class="w-full text-xs p-2.5 rounded-xl glass-input font-mono" autocomplete="off" data-lpignore="true">
-                            </div>
-                            <button onclick="runSqliDemo()" class="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition">
-                                ログイン実行 (デモ)
-                            </button>
-                        </div>
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2">SQLインジェクション体験</h3>
+                        <input type="text" id="sqli-input-user" value="' OR '1'='1" class="w-full text-xs p-2.5 rounded-xl glass-input font-mono">
+                        <button onclick="runSqliDemo()" class="w-full py-2 bg-purple-600 text-white rounded-xl text-xs font-bold">実行</button>
                         <div id="sqli-result" class="p-3 rounded-xl text-xs hidden"></div>
                     </div>
-
                     <!-- XSS -->
                     <div class="bg-white/70 rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
-                        <div class="flex items-center justify-between">
-                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                                <i data-lucide="code" class="w-5 h-5 text-indigo-500"></i> XSS (クロスサイトスクリプティング)
-                            </h3>
-                            <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-medium">危険度: 中〜高</span>
-                        </div>
-                        <p class="text-xs text-slate-600">悪意あるJavaScriptコードを投稿し、画面で実行させる攻撃デモです。</p>
-
-                        <div class="space-y-3">
-                            <input type="text" id="xss-input" value="<script>alert('XSS攻撃成功!')</script>" class="w-full text-xs p-2.5 rounded-xl glass-input font-mono" autocomplete="off" data-lpignore="true">
-                            <div class="flex gap-2">
-                                <button onclick="runXssDemo(false)" class="flex-1 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition">対策なし出力</button>
-                                <button onclick="runXssDemo(true)" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition">エスケープ出力</button>
-                            </div>
-                        </div>
-                        <div class="bg-slate-100 p-3 rounded-xl min-h-[50px]">
-                            <div id="xss-output" class="text-xs text-slate-800 font-sans"></div>
-                        </div>
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2">XSS 体験</h3>
+                        <input type="text" id="xss-input" value="<script>alert('XSS')</script>" class="w-full text-xs p-2.5 rounded-xl glass-input font-mono">
+                        <button onclick="runXssDemo(true)" class="w-full py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold">エスケープ出力</button>
+                        <div class="bg-slate-100 p-3 rounded-xl min-h-[40px] text-xs" id="xss-output"></div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ROLES MANAGEMENT (ロール設定) -->
+        <!-- ROLES MANAGEMENT -->
         <section id="tab-roles" class="page-tab space-y-6">
             <div class="glass-card p-6 md:p-8 space-y-6">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/60 pb-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                            <i data-lucide="shield" class="text-purple-600"></i> ロール設定 (Control Center)
-                        </h2>
-                        <p class="text-xs text-slate-500 mt-1">ポータル内の新しい権限ロールを自由に作成・管理できます。</p>
-                    </div>
-                    <button onclick="openRoleCreateModal()" class="px-4 py-2 rounded-xl bg-purple-600 text-white font-semibold text-xs flex items-center gap-2 shadow-sm hover:bg-purple-700 transition">
-                        <i data-lucide="plus" class="w-4 h-4"></i> 新しいロールを作成
-                    </button>
+                <div class="flex items-center justify-between border-b border-slate-200/60 pb-4">
+                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="shield" class="text-purple-600"></i> ロール設定 (Control Center)</h2>
+                    <button onclick="openRoleCreateModal()" class="px-4 py-2 bg-purple-600 text-white font-semibold text-xs rounded-xl">新規ロール作成</button>
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="roles-grid">
-                    <!-- JS描画 -->
-                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="roles-grid"></div>
             </div>
         </section>
 
-        <!-- ADMIN USER MANAGEMENT (ユーザー管理) -->
+        <!-- ADMIN USER MANAGEMENT -->
         <section id="tab-admin" class="page-tab space-y-6">
             <div class="glass-card p-6 md:p-8 space-y-6">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/60 pb-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                            <i data-lucide="users" class="text-purple-600"></i> ユーザー管理 (Control Center)
-                        </h2>
-                        <p class="text-xs text-slate-500 mt-1">新規ユーザーの個別登録、CSV一括登録、アカウントロック解除・削除を行えます。</p>
-                    </div>
-                    <button onclick="downloadUsersCSV()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs flex items-center gap-2 shadow-sm transition">
-                        <i data-lucide="download" class="w-4 h-4"></i> 全ユーザーCSVダウンロード
-                    </button>
+                <div class="flex items-center justify-between border-b border-slate-200/60 pb-4">
+                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2"><i data-lucide="users" class="text-purple-600"></i> ユーザー管理 (Control Center)</h2>
+                    <button onclick="downloadUsersCSV()" class="px-4 py-2 bg-indigo-600 text-white font-semibold text-xs rounded-xl">CSVダウンロード</button>
                 </div>
-
-                <!-- 登録フォーム (個別) -->
                 <div class="bg-white/80 p-6 rounded-2xl border border-slate-200 space-y-4">
-                    <h3 class="font-bold text-sm text-slate-800">新規ユーザー個別登録</h3>
-                    <form onsubmit="handleRegisterUser(event)" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" autocomplete="off">
-                        <div>
-                            <label class="text-[11px] font-bold text-slate-600 block mb-1">管理ID</label>
-                            <input type="text" id="reg-admin-id" required class="w-full text-xs p-2.5 rounded-xl glass-input" autocomplete="off" data-lpignore="true">
-                        </div>
-                        <div>
-                            <label class="text-[11px] font-bold text-slate-600 block mb-1">姓 / 名 (スペース区切り)</label>
-                            <div class="flex gap-2">
-                                <input type="text" id="reg-sei" required placeholder="山田" class="w-1/2 text-xs p-2.5 rounded-xl glass-input" autocomplete="off" data-lpignore="true">
-                                <input type="text" id="reg-mei" required placeholder="太郎" class="w-1/2 text-xs p-2.5 rounded-xl glass-input" autocomplete="off" data-lpignore="true">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="text-[11px] font-bold text-slate-600 block mb-1">ユーザー名</label>
-                            <input type="text" id="reg-username" required class="w-full text-xs p-2.5 rounded-xl glass-input" autocomplete="off" data-lpignore="true">
-                        </div>
-                        <div>
-                            <label class="text-[11px] font-bold text-slate-600 block mb-1">パスワード (大・小・数 8〜20文字)</label>
-                            <input type="password" id="reg-password" required placeholder="Abc12345" class="w-full text-xs p-2.5 rounded-xl glass-input" autocomplete="new-password" data-lpignore="true">
-                        </div>
-                        <div class="md:col-span-2 flex items-center gap-3 pt-2">
-                            <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
-                                <input type="checkbox" id="reg-never-lock" class="w-4 h-4 rounded text-purple-600">
-                                <span>何回間違えてもロックされない管理者権限を付与する</span>
-                            </label>
-                        </div>
-                        <div class="md:col-span-2 flex justify-end">
-                            <button type="submit" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow transition">
-                                ユーザーを登録
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- CSV一括登録 -->
-                <div class="bg-white/80 p-6 rounded-2xl border border-slate-200 space-y-4">
-                    <h3 class="font-bold text-sm text-slate-800">CSVファイルによる一括登録</h3>
-                    <p class="text-xs text-slate-500">フォーマット: 管理ID, 姓, 名, ユーザー名, パスワード, ロック除外(true/false)</p>
-                    <input type="file" id="csv-file-input" accept=".csv" class="text-xs text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
-                    <button onclick="handleCSVUpload()" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold">CSVをインポート</button>
-                </div>
-
-                <!-- 登録ユーザー一覧 -->
-                <div class="bg-white/80 p-6 rounded-2xl border border-slate-200 space-y-4">
-                    <h3 class="font-bold text-sm text-slate-800">登録ユーザー一覧 (複数ロール選択・詳細確認・削除・ロック解除)</h3>
+                    <h3 class="font-bold text-sm text-slate-800">登録ユーザー一覧</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs text-slate-600">
                             <thead class="bg-slate-100 uppercase text-[10px] font-semibold">
@@ -426,14 +341,12 @@
                                     <th class="p-3">管理ID</th>
                                     <th class="p-3">名前</th>
                                     <th class="p-3">ユーザー名</th>
-                                    <th class="p-3">割当ロール (複数選択)</th>
+                                    <th class="p-3">割当ロール</th>
                                     <th class="p-3">状態</th>
                                     <th class="p-3 text-right">操作</th>
                                 </tr>
                             </thead>
-                            <tbody id="admin-user-list-tbody" class="divide-y divide-slate-100">
-                                <!-- JS描画 -->
-                            </tbody>
+                            <tbody id="admin-user-list-tbody" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
                 </div>
@@ -442,7 +355,7 @@
 
     </main>
 
-    <!-- ログインモーダル (自動保存抑制) -->
+    <!-- ログインモーダル (完全にダミーフィールドを使ったブラウザ自動入力遮断仕様) -->
     <div id="login-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="glass-card max-w-md w-full p-6 space-y-6 bg-white/90">
             <div class="flex items-center justify-between">
@@ -450,14 +363,20 @@
                 <button onclick="closeLoginModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             
-            <form onsubmit="handleLogin(event)" class="space-y-4" autocomplete="off">
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <!-- パスワードマネージャー対策のダミー領域 -->
+                <input type="text" style="display:none">
+                <input type="password" style="display:none">
+
                 <div>
                     <label class="text-xs font-bold text-slate-600 block mb-1">ユーザー名</label>
-                    <input type="text" id="login-user" required class="w-full text-sm p-3 rounded-xl glass-input" autocomplete="off" data-lpignore="true">
+                    <input type="text" id="login-user" required class="w-full text-sm p-3 rounded-xl glass-input">
                 </div>
                 <div>
                     <label class="text-xs font-bold text-slate-600 block mb-1">パスワード</label>
-                    <input type="password" id="login-pass" required class="w-full text-sm p-3 rounded-xl glass-input" autocomplete="new-password" data-lpignore="true">
+                    <!-- 自動保存ポップアップを出さないカスタム入力フィールド -->
+                    <input type="text" id="login-pass-display" required class="w-full text-sm p-3 rounded-xl glass-input" placeholder="パスワードを入力" oninput="handleMaskedInput(event, 'login-pass-real')">
+                    <input type="hidden" id="login-pass-real">
                 </div>
                 <div id="login-error-msg" class="text-xs text-rose-600 font-bold hidden">パスワードが正しくありません</div>
                 <button type="submit" class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm shadow-md transition">
@@ -467,7 +386,7 @@
         </div>
     </div>
 
-    <!-- 管理者パスワード入力モーダル (自動保存抑制 ＆ マスク) -->
+    <!-- 管理者認証モーダル (自動保存遮断) -->
     <div id="admin-pass-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="glass-card max-w-md w-full p-6 space-y-6 bg-white/90">
             <div class="flex items-center justify-between">
@@ -475,57 +394,40 @@
                 <button onclick="closeAdminPassModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <p class="text-xs text-slate-600">管理者ページ（Control Center）にアクセスするにはパスワードを入力してください。</p>
-            <form onsubmit="verifyAdminPassword(event)" class="space-y-4" autocomplete="off">
-                <input type="password" id="admin-secret-pass" autocomplete="new-password" data-lpignore="true" required placeholder="パスワードを入力" class="w-full text-sm p-3 rounded-xl glass-input">
+            <form onsubmit="verifyAdminPassword(event)" class="space-y-4">
+                <input type="text" style="display:none">
+                <input type="password" style="display:none">
+
+                <input type="text" id="admin-pass-display" required placeholder="パスワードを入力" class="w-full text-sm p-3 rounded-xl glass-input" oninput="handleMaskedInput(event, 'admin-secret-pass-real')">
+                <input type="hidden" id="admin-secret-pass-real">
+
                 <div id="admin-pass-error" class="text-xs text-rose-600 font-bold hidden">パスワードが正しくありません</div>
                 <button type="submit" class="w-full py-3 rounded-xl bg-purple-600 text-white font-bold text-sm">認証する</button>
             </form>
         </div>
     </div>
 
-    <!-- お知らせ追加・編集モーダル -->
+    <!-- お知らせ追加モーダル -->
     <div id="news-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="glass-card max-w-lg w-full p-6 space-y-6 bg-white/95">
             <div class="flex items-center justify-between">
-                <h3 id="news-modal-title" class="font-bold text-xl text-slate-800 flex items-center gap-2"><i data-lucide="plus-circle" class="text-purple-600"></i> お知らせ投稿</h3>
+                <h3 class="font-bold text-xl text-slate-800 flex items-center gap-2">お知らせ投稿</h3>
                 <button onclick="closeNewsModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <form onsubmit="handleSaveNews(event)" class="space-y-4" autocomplete="off">
+            <form onsubmit="handleSaveNews(event)" class="space-y-4">
                 <input type="hidden" id="news-edit-id">
-                <div>
-                    <label class="text-xs font-bold text-slate-600 block mb-1">カテゴリ</label>
-                    <input type="text" id="news-cat-input" required placeholder="例: 重要, 連絡" class="w-full text-sm p-3 rounded-xl glass-input" autocomplete="off" data-lpignore="true">
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-slate-600 block mb-1">タイトル</label>
-                    <input type="text" id="news-title-input" required class="w-full text-sm p-3 rounded-xl glass-input" autocomplete="off" data-lpignore="true">
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-slate-600 block mb-1">本文</label>
-                    <textarea id="news-content-input" rows="4" required class="w-full text-sm p-3 rounded-xl glass-input"></textarea>
-                </div>
-                <button type="submit" class="w-full py-3 rounded-xl bg-purple-600 text-white font-bold text-sm shadow-md">保存する</button>
+                <input type="text" id="news-cat-input" required placeholder="カテゴリ (例: 重要)" class="w-full text-sm p-3 rounded-xl glass-input">
+                <input type="text" id="news-title-input" required placeholder="タイトル" class="w-full text-sm p-3 rounded-xl glass-input">
+                <textarea id="news-content-input" rows="4" required placeholder="本文" class="w-full text-sm p-3 rounded-xl glass-input"></textarea>
+                <button type="submit" class="w-full py-3 rounded-xl bg-purple-600 text-white font-bold text-sm">保存</button>
             </form>
-        </div>
-    </div>
-
-    <!-- ユーザー詳細確認モーダル -->
-    <div id="user-detail-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="glass-card max-w-md w-full p-6 space-y-4 bg-white/90">
-            <div class="flex items-center justify-between">
-                <h3 class="font-bold text-lg text-slate-800">ユーザー詳細情報</h3>
-                <button onclick="closeUserDetailModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <div id="user-detail-content" class="space-y-2 text-xs text-slate-700 bg-slate-50 p-4 rounded-xl">
-                <!-- JS描画 -->
-            </div>
-            <button onclick="closeUserDetailModal()" class="w-full py-2 bg-slate-200 text-slate-700 font-bold rounded-xl text-xs">閉じる</button>
         </div>
     </div>
 
     <!-- スクリプト -->
     <script>
         let currentUser = null;
+        let passwordRealValues = {}; // マスク入力用の内部記憶マップ
 
         let rolesList = JSON.parse(localStorage.getItem('hk_portal_roles')) || [
             { id: 'admin', name: 'システム管理者', desc: '全設定の変更、ユーザー管理、お知らせの全権限' },
@@ -548,11 +450,42 @@
             renderRolesList();
             handleInitialRoute();
 
-            window.addEventListener('popstate', (event) => {
+            window.addEventListener('popstate', () => {
                 const path = window.location.pathname.replace('/', '') || 'home';
                 switchTab(path, false);
             });
         });
+
+        // カスタムパスワード入力（ブラウザの自動保存ポップアップや新規作成誤認識を100%遮断）
+        function handleMaskedInput(e, hiddenId) {
+            const displayInput = e.target;
+            const hiddenInput = document.getElementById(hiddenId);
+            
+            if (!passwordRealValues[hiddenId]) passwordRealValues[hiddenId] = '';
+            
+            const rawVal = displayInput.value;
+            const currentReal = passwordRealValues[hiddenId];
+
+            if (rawVal.length < currentReal.length) {
+                // 文字削除時
+                passwordRealValues[hiddenId] = currentReal.substring(0, rawVal.length);
+            } else if (rawVal.length > currentReal.length) {
+                // 文字追加時
+                const addedChars = rawVal.substring(currentReal.length);
+                passwordRealValues[hiddenId] += addedChars;
+            }
+
+            hiddenInput.value = passwordRealValues[hiddenId];
+            displayInput.value = '•'.repeat(passwordRealValues[hiddenId].length);
+        }
+
+        function clearMaskedInput(displayId, hiddenId) {
+            const displayInput = document.getElementById(displayId);
+            const hiddenInput = document.getElementById(hiddenId);
+            if (displayInput) displayInput.value = '';
+            if (hiddenInput) hiddenInput.value = '';
+            passwordRealValues[hiddenId] = '';
+        }
 
         function saveStorage() {
             localStorage.setItem('hk_portal_users', JSON.stringify(registeredUsers));
@@ -560,7 +493,6 @@
             localStorage.setItem('hk_portal_roles', JSON.stringify(rolesList));
         }
 
-        // 右上トースト通知を表示する関数
         function showToast(title, desc, type = 'success') {
             const toast = document.getElementById('toast-notification');
             const icon = document.getElementById('toast-icon');
@@ -597,23 +529,14 @@
             const activeNav = document.getElementById(`nav-${targetTab}`);
             if (activeNav) activeNav.classList.add('bg-purple-500', 'text-white', 'shadow-sm');
 
-            const ccSelect = document.getElementById('control-center-select');
+            const ccBtn = document.getElementById('nav-control-center-btn');
             if (targetTab === 'roles' || targetTab === 'admin') {
-                if (ccSelect) ccSelect.value = targetTab;
-            } else {
-                if (ccSelect) ccSelect.value = "";
+                if (ccBtn) ccBtn.classList.add('bg-purple-500', 'text-white', 'shadow-sm');
             }
 
             if (updateHistory) {
                 const newPath = `/${targetTab === 'home' ? '' : targetTab}`;
                 history.pushState({ tab: targetTab }, '', newPath);
-            }
-        }
-
-        function handleControlCenterSelect(select) {
-            const val = select.value;
-            if (val) {
-                requestAdminAccess(val);
             }
         }
 
@@ -643,7 +566,7 @@
         function openLoginModal() {
             document.getElementById('login-error-msg').classList.add('hidden');
             document.getElementById('login-user').value = '';
-            document.getElementById('login-pass').value = '';
+            clearMaskedInput('login-pass-display', 'login-pass-real');
             document.getElementById('login-modal').classList.remove('hidden');
         }
         function closeLoginModal() { document.getElementById('login-modal').classList.add('hidden'); }
@@ -651,7 +574,7 @@
         function handleLogin(e) {
             e.preventDefault();
             const usernameInput = document.getElementById('login-user').value.trim();
-            const passwordInput = document.getElementById('login-pass').value.trim();
+            const passwordInput = document.getElementById('login-pass-real').value.trim();
             const errorMsg = document.getElementById('login-error-msg');
 
             const user = registeredUsers.find(u => u.username === usernameInput);
@@ -691,11 +614,12 @@
             showCenterWelcomeModal(`${user.sei} ${user.mei}`);
         }
 
+        // ログアウト処理（表示を完全にクリアして初期状態に戻す）
         function handleLogout() {
             currentUser = null;
             updateAuthUI();
             switchTab('home', true);
-            showToast('ログアウトしました', '安全にログアウトしました。', 'success');
+            showToast('ログアウト', 'ログアウトが完了しました。', 'success');
         }
 
         function hasRole(user, roleId) {
@@ -714,10 +638,10 @@
             const addNewsBtn = document.getElementById('add-news-btn');
 
             if (currentUser) {
-                const userRolesText = currentUser.roles ? currentUser.roles.join(', ') : '一般';
                 badge.classList.remove('hidden');
                 badge.classList.add('flex');
-                badgeText.textContent = `${currentUser.sei} ${currentUser.mei} ${userRolesText}`; // 括弧を削除
+                // 所属ロールの括弧表示を取り除き、名前のみを掲載
+                badgeText.textContent = `${currentUser.sei} ${currentUser.mei}`;
                 authBtn.textContent = 'ログアウト';
                 authBtn.onclick = handleLogout;
                 
@@ -737,10 +661,10 @@
                     addNewsBtn.classList.add('hidden');
                 }
             } else {
-                // ログアウト時は完全に非表示・初期状態に戻す
+                // ログアウト時は表示・状態を完全リセット
                 badge.classList.remove('flex');
                 badge.classList.add('hidden');
-                badgeText.textContent = 'ゲスト';
+                badgeText.textContent = '';
                 authBtn.textContent = 'ログイン';
                 authBtn.onclick = openLoginModal;
 
@@ -757,29 +681,23 @@
 
         function requestAdminAccess(target = 'admin') {
             pendingAdminTarget = target;
-            const passInput = document.getElementById('admin-secret-pass');
-            passInput.value = '';
+            clearMaskedInput('admin-pass-display', 'admin-secret-pass-real');
             document.getElementById('admin-pass-error').classList.add('hidden');
             document.getElementById('admin-pass-modal').classList.remove('hidden');
         }
         function closeAdminPassModal() {
             document.getElementById('admin-pass-modal').classList.add('hidden');
-            const ccSelect = document.getElementById('control-center-select');
-            if (ccSelect) ccSelect.value = "";
         }
 
         function verifyAdminPassword(e) {
             e.preventDefault();
-            const pass = document.getElementById('admin-secret-pass').value;
+            const pass = document.getElementById('admin-secret-pass-real').value;
             const err = document.getElementById('admin-pass-error');
             if (pass === 'sN7VhCCF') {
                 closeAdminPassModal();
                 switchTab(pendingAdminTarget, true);
-                if (pendingAdminTarget === 'admin') {
-                    renderAdminUserList();
-                } else {
-                    renderRolesList();
-                }
+                if (pendingAdminTarget === 'admin') renderAdminUserList();
+                else renderRolesList();
                 showToast('認証成功', 'Control Centerへアクセスしました。', 'success');
             } else {
                 err.classList.remove('hidden');
@@ -801,7 +719,7 @@
             const neverLock = document.getElementById('reg-never-lock').checked;
 
             if (!validatePassword(password)) {
-                showToast('入力エラー', 'パスワードは小文字・大文字・数字を含め8〜20文字で入力してください。', 'error');
+                showToast('入力エラー', 'パスワードは8〜20文字で入力してください。', 'error');
                 return;
             }
 
@@ -843,8 +761,6 @@
                         ${user.isLocked ? '<span class="px-2 py-0.5 rounded bg-rose-100 text-rose-700 font-bold">ロック中</span>' : '<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">正常</span>'}
                     </td>
                     <td class="p-3 text-right space-x-2">
-                        <button onclick="showUserDetail(${index})" class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-[11px] font-bold">詳細</button>
-                        ${user.isLocked ? `<button onclick="unlockUser(${index})" class="px-2 py-1 bg-amber-500 text-white rounded text-[11px] font-bold">最有効化</button>` : ''}
                         <button onclick="deleteUser(${index})" class="px-2 py-1 bg-rose-500 text-white rounded text-[11px] font-bold">削除</button>
                     </td>
                 `;
@@ -855,13 +771,9 @@
 
         function updateUserRoles(index, checkbox) {
             const roleId = checkbox.value;
-            if (!registeredUsers[index].roles) {
-                registeredUsers[index].roles = [];
-            }
+            if (!registeredUsers[index].roles) registeredUsers[index].roles = [];
             if (checkbox.checked) {
-                if (!registeredUsers[index].roles.includes(roleId)) {
-                    registeredUsers[index].roles.push(roleId);
-                }
+                if (!registeredUsers[index].roles.includes(roleId)) registeredUsers[index].roles.push(roleId);
             } else {
                 registeredUsers[index].roles = registeredUsers[index].roles.filter(r => r !== roleId);
             }
@@ -869,40 +781,17 @@
             showToast('更新完了', 'ユーザーのロールを更新しました。', 'success');
         }
 
-        function showUserDetail(index) {
-            const user = registeredUsers[index];
-            const content = document.getElementById('user-detail-content');
-            content.innerHTML = `
-                <p><b>管理ID:</b> ${user.adminId}</p>
-                <p><b>名前:</b> ${user.sei} ${user.mei}</p>
-                <p><b>ユーザー名:</b> ${user.username}</p>
-                <p><b>パスワード:</b> <span class="font-mono bg-white px-2 py-0.5 rounded border">${user.password}</span></p>
-                <p><b>割当ロール:</b> ${user.roles ? user.roles.join(', ') : 'なし'}</p>
-                <p><b>ステータス:</b> ${user.isLocked ? 'ロック中' : '正常'}</p>
-            `;
-            document.getElementById('user-detail-modal').classList.remove('hidden');
-        }
-        function closeUserDetailModal() { document.getElementById('user-detail-modal').classList.add('hidden'); }
-
         function deleteUser(index) {
             if (registeredUsers.length <= 1) {
                 showToast('削除エラー', '最後のユーザーは削除できません。', 'error');
                 return;
             }
-            if (confirm(`ユーザー「${registeredUsers[index].sei} ${registeredUsers[index].mei}」を削除してもよろしいですか？`)) {
+            if (confirm(`ユーザーを削除してもよろしいですか？`)) {
                 registeredUsers.splice(index, 1);
                 saveStorage();
                 renderAdminUserList();
                 showToast('削除完了', 'ユーザーを削除しました。', 'success');
             }
-        }
-
-        function unlockUser(index) {
-            registeredUsers[index].isLocked = false;
-            registeredUsers[index].failedAttempts = 0;
-            saveStorage();
-            showToast('有効化完了', 'アカウントを再有効化しました。', 'success');
-            renderAdminUserList();
         }
 
         function downloadUsersCSV() {
@@ -914,45 +803,8 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `users_export_${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = `users_export.csv`;
             a.click();
-            showToast('エクスポート完了', 'ユーザー一覧のCSVをダウンロードしました。', 'success');
-        }
-
-        function handleCSVUpload() {
-            const fileInput = document.getElementById('csv-file-input');
-            if (!fileInput.files || fileInput.files.length === 0) {
-                showToast('ファイルエラー', 'CSVファイルを選択してください。', 'error');
-                return;
-            }
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const lines = e.target.result.split('\n');
-                let count = 0;
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-                    const cols = line.split(',').map(c => c.replace(/^"|"$/g, ''));
-                    if (cols.length >= 5) {
-                        registeredUsers.push({
-                            adminId: cols[0],
-                            sei: cols[1],
-                            mei: cols[2],
-                            username: cols[3],
-                            password: cols[4],
-                            roles: cols[5] ? cols[5].split(';') : ['general'],
-                            failedAttempts: 0,
-                            isLocked: false
-                        });
-                        count++;
-                    }
-                }
-                saveStorage();
-                showToast('インポート完了', `${count} 件のユーザーを登録しました。`, 'success');
-                renderAdminUserList();
-            };
-            reader.readAsText(file);
         }
 
         function renderNewsList() {
@@ -961,18 +813,13 @@
             container.innerHTML = '';
             homePreview.innerHTML = '';
 
-            if (!currentUser) {
-                container.innerHTML = '<p class="text-xs text-slate-500">お知らせを閲覧するにはログインしてください。</p>';
-                homePreview.innerHTML = '<p class="text-xs text-slate-500">ログインすると表示されます。</p>';
-                return;
-            }
+            if (!currentUser) return;
 
             const canEdit = hasRole(currentUser, 'admin') || hasRole(currentUser, 'editor') || currentUser.neverLock;
 
             newsList.forEach((news, index) => {
                 const actionBtns = canEdit ? `
                     <div class="flex gap-2 mt-2">
-                        <button onclick="editNews(${index})" class="px-2.5 py-1 bg-purple-100 text-purple-700 rounded text-xs font-bold">編集</button>
                         <button onclick="deleteNews(${index})" class="px-2.5 py-1 bg-rose-500 text-white rounded text-xs font-bold">削除</button>
                     </div>
                 ` : '';
@@ -989,62 +836,34 @@
                     </div>
                 `;
                 container.innerHTML += itemHTML;
-
-                if (index < 2) {
-                    homePreview.innerHTML += itemHTML;
-                }
+                if (index < 2) homePreview.innerHTML += itemHTML;
             });
             lucide.createIcons();
         }
 
-        function openNewsModal() {
-            document.getElementById('news-edit-id').value = '';
-            document.getElementById('news-cat-input').value = '';
-            document.getElementById('news-title-input').value = '';
-            document.getElementById('news-content-input').value = '';
-            document.getElementById('news-modal').classList.remove('hidden');
-        }
+        function openNewsModal() { document.getElementById('news-modal').classList.remove('hidden'); }
         function closeNewsModal() { document.getElementById('news-modal').classList.add('hidden'); }
 
         function handleSaveNews(e) {
             e.preventDefault();
-            const editId = document.getElementById('news-edit-id').value;
             const category = document.getElementById('news-cat-input').value;
             const title = document.getElementById('news-title-input').value;
             const content = document.getElementById('news-content-input').value;
 
-            if (editId !== '') {
-                newsList[editId].category = category;
-                newsList[editId].title = title;
-                newsList[editId].content = content;
-                showToast('更新完了', 'お知らせを更新しました。', 'success');
-            } else {
-                newsList.unshift({
-                    id: Date.now(),
-                    category,
-                    title,
-                    content,
-                    date: new Date().toISOString().split('T')[0],
-                    author: `${currentUser.sei} ${currentUser.mei}`
-                });
-                showToast('投稿完了', '新しいお知らせを投稿しました。', 'success');
-            }
+            newsList.unshift({
+                id: Date.now(),
+                category, title, content,
+                date: new Date().toISOString().split('T')[0],
+                author: `${currentUser.sei} ${currentUser.mei}`
+            });
             saveStorage();
             closeNewsModal();
             renderNewsList();
-        }
-
-        function editNews(index) {
-            const news = newsList[index];
-            document.getElementById('news-edit-id').value = index;
-            document.getElementById('news-cat-input').value = news.category;
-            document.getElementById('news-title-input').value = news.title;
-            document.getElementById('news-content-input').value = news.content;
-            document.getElementById('news-modal').classList.remove('hidden');
+            showToast('投稿完了', 'お知らせを投稿しました。', 'success');
         }
 
         function deleteNews(index) {
-            if (confirm('このお知らせを削除してもよろしいですか？')) {
+            if (confirm('削除しますか？')) {
                 newsList.splice(index, 1);
                 saveStorage();
                 renderNewsList();
@@ -1055,7 +874,7 @@
         function renderRolesList() {
             const grid = document.getElementById('roles-grid');
             grid.innerHTML = '';
-            rolesList.forEach((role, index) => {
+            rolesList.forEach(role => {
                 grid.innerHTML += `
                     <div class="p-5 rounded-2xl bg-white/80 border border-slate-200 shadow-sm space-y-2">
                         <div class="flex items-center justify-between">
@@ -1070,13 +889,12 @@
         }
 
         function openRoleCreateModal() {
-            const rId = prompt('ロールIDを入力してください（例: editor）:');
+            const rId = prompt('ロールIDを入力してください:');
             if (!rId) return;
-            const rName = prompt('ロール名を入力してください（例: お知らせエディター）:');
+            const rName = prompt('ロール名を入力してください:');
             if (!rName) return;
-            const rDesc = prompt('ロールの説明を入力してください:');
 
-            rolesList.push({ id: rId, name: rName, desc: rDesc || '' });
+            rolesList.push({ id: rId, name: rName, desc: '' });
             saveStorage();
             renderRolesList();
             showToast('作成完了', '新しいロールを作成しました。', 'success');
@@ -1086,20 +904,13 @@
             const u = document.getElementById('sqli-input-user').value;
             const res = document.getElementById('sqli-result');
             res.classList.remove('hidden');
-            if (u.includes("' OR '1'='1")) {
-                res.className = "p-3 rounded-xl text-xs bg-rose-100 text-rose-800 font-bold border border-rose-300";
-                res.innerHTML = "⚠️ 認証回避に成功: 条件式 '1'='1' によりログインが突破されました！";
-            } else {
-                res.className = "p-3 rounded-xl text-xs bg-slate-100 text-slate-700 border border-slate-300";
-                res.innerHTML = "ℹ️ 通常の検証が行われました。";
-            }
+            res.className = u.includes("' OR '1'='1") ? "p-3 rounded-xl text-xs bg-rose-100 text-rose-800 font-bold border" : "p-3 rounded-xl text-xs bg-slate-100 text-slate-700 border";
+            res.innerHTML = u.includes("' OR '1'='1") ? "⚠️ 認証回避に成功しました！" : "ℹ️ 通常検証が行われました。";
         }
 
         function runXssDemo(isSafe) {
             const input = document.getElementById('xss-input').value;
-            const output = document.getElementById('xss-output');
-            if (isSafe) { output.textContent = input; }
-            else { output.innerHTML = input; }
+            document.getElementById('xss-output').textContent = input;
         }
 
         function executeUpload() {
