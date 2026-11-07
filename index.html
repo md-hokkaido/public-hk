@@ -83,6 +83,11 @@
             pointer-events: none;
             z-index: 0;
         }
+
+        /* トースト通知アニメーション */
+        #toast-notification {
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
     </style>
 </head>
 <body class="relative min-h-screen pb-16">
@@ -90,6 +95,15 @@
     <!-- 背景バブル -->
     <div class="bubble w-72 h-72 top-10 left-10 float-animation"></div>
     <div class="bubble w-96 h-96 bottom-10 right-10 float-animation-delayed"></div>
+
+    <!-- トースト通知 (ようこそポップアップ) -->
+    <div id="toast-notification" class="fixed top-20 right-6 z-50 transform translate-x-full opacity-0 glass-card px-6 py-4 shadow-xl border-purple-200 bg-white/90 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold">✨</div>
+        <div>
+            <h4 id="toast-title" class="font-bold text-sm text-slate-800">ようこそ！</h4>
+            <p id="toast-desc" class="text-xs text-slate-500">ログインに成功しました。</p>
+        </div>
+    </div>
 
     <!-- ヘッダー -->
     <header class="sticky top-0 z-50 glass-nav px-4 lg:px-8 py-3 mb-8 shadow-sm">
@@ -106,7 +120,8 @@
                 </div>
             </div>
 
-            <nav class="flex flex-wrap items-center justify-center gap-1 sm:gap-2">
+            <!-- ナビゲーションメニュー -->
+            <nav id="main-nav" class="flex flex-wrap items-center justify-center gap-1 sm:gap-2">
                 <button onclick="switchTab('home')" id="nav-home" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 bg-purple-500 text-white shadow-sm">
                     <i data-lucide="home" class="w-4 h-4"></i> ホーム
                 </button>
@@ -119,7 +134,8 @@
                 <button onclick="switchTab('security')" id="nav-security" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-600 hover:bg-white/60">
                     <i data-lucide="shield-check" class="w-4 h-4"></i> セキュリティ学習
                 </button>
-                <button onclick="requestAdminAccess()" id="nav-admin" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-purple-700 bg-purple-100 hover:bg-purple-200">
+                <!-- 管理者用タブ (初期は非表示) -->
+                <button onclick="requestAdminAccess()" id="nav-admin" class="nav-btn hidden px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-purple-700 bg-purple-100 hover:bg-purple-200">
                     <i data-lucide="shield" class="w-4 h-4"></i> ユーザー管理 (管理者)
                 </button>
             </nav>
@@ -148,9 +164,36 @@
                     <h2 class="text-3xl md:text-5xl font-extrabold text-slate-800 leading-tight">
                         安全でシンプルな<br><span class="text-purple-600">ファイル共有 ＆ 情報拠点</span>
                     </h2>
-                    <p class="text-slate-600 text-sm md:text-base leading-relaxed">
-                        登録されたユーザーのみがアクセス可能なセキュアなポータル環境です。
+                    <p id="home-subtitle" class="text-slate-600 text-sm md:text-base leading-relaxed">
+                        現在ゲスト閲覧中です。すべての機能を利用するにはログインしてください。
                     </p>
+                </div>
+            </div>
+
+            <!-- ログイン後に表示される機能ショートカットカード群 -->
+            <div id="home-feature-cards" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div onclick="switchTab('files')" class="glass-card p-6 cursor-pointer group float-animation">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i data-lucide="cloud-cog" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-800 mb-1">ファイル受け渡し</h3>
+                    <p class="text-xs text-slate-500">Google Drive連携による安全なファイル保存・共有</p>
+                </div>
+
+                <div onclick="switchTab('news')" class="glass-card p-6 cursor-pointer group float-animation-delayed">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i data-lucide="megaphone" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-800 mb-1">お知らせ一覧</h3>
+                    <p class="text-xs text-slate-500">最新情報・連絡事項の確認</p>
+                </div>
+
+                <div onclick="switchTab('security')" class="glass-card p-6 cursor-pointer group float-animation-slow">
+                    <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-4 group-hover:scale-110 transition">
+                        <i data-lucide="shield-alert" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-800 mb-1">セキュリティ学習</h3>
+                    <p class="text-xs text-slate-500">サイバー攻撃体験デモと防衛学習</p>
                 </div>
             </div>
         </section>
@@ -197,7 +240,7 @@
                         <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
                             <i data-lucide="users" class="text-purple-600"></i> ユーザー管理 (管理者専用)
                         </h2>
-                        <p class="text-xs text-slate-500 mt-1">新規ユーザーの個別登録、CSV一括登録、アカウントロック解除を行えます。</p>
+                        <p class="text-xs text-slate-500 mt-1">新規ユーザーの個別登録、CSV一括登録、アカウントロック解除・削除を行えます。</p>
                     </div>
                     <button onclick="downloadUsersCSV()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs flex items-center gap-2 shadow-sm transition">
                         <i data-lucide="download" class="w-4 h-4"></i> 全ユーザーCSVダウンロード
@@ -251,7 +294,7 @@
 
                 <!-- 登録ユーザー一覧 -->
                 <div class="bg-white/80 p-6 rounded-2xl border border-slate-200 space-y-4">
-                    <h3 class="font-bold text-sm text-slate-800">登録ユーザー一覧 (クリックして詳細確認・ロック解除)</h3>
+                    <h3 class="font-bold text-sm text-slate-800">登録ユーザー一覧 (クリックして詳細確認・削除・ロック解除)</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs text-slate-600">
                             <thead class="bg-slate-100 uppercase text-[10px] font-semibold">
@@ -308,7 +351,8 @@
             </div>
             <p class="text-xs text-slate-600">管理者ページにアクセスするにはパスワードを入力してください。</p>
             <form onsubmit="verifyAdminPassword(event)" class="space-y-4">
-                <input type="password" id="admin-secret-pass" required placeholder="パスワードを入力" class="w-full text-sm p-3 rounded-xl glass-input">
+                <!-- autocomplete="off" を追加してオートコンプリートによる記憶・自動入力を防止 -->
+                <input type="password" id="admin-secret-pass" autocomplete="new-password" required placeholder="パスワードを入力" class="w-full text-sm p-3 rounded-xl glass-input">
                 <div id="admin-pass-error" class="text-xs text-rose-600 font-bold hidden">パスワードが正しくありません</div>
                 <button type="submit" class="w-full py-3 rounded-xl bg-purple-600 text-white font-bold text-sm">認証する</button>
             </form>
@@ -333,7 +377,7 @@
     <script>
         let currentUser = null;
 
-        // 初期ユーザーデータ（デフォルト管理者: admin / パスワード: Admin1234）
+        // 初期ユーザーデータ（デフォルト管理者: admin / パスワード: Admin1234 / ロック除外設定 true）
         let registeredUsers = JSON.parse(localStorage.getItem('hk_portal_users')) || [
             { adminId: 'ADM-001', sei: '管理者', mei: '太郎', username: 'admin', password: 'Admin1234', neverLock: true, failedAttempts: 0, isLocked: false }
         ];
@@ -358,7 +402,27 @@
             if (activeNav) activeNav.classList.add('bg-purple-500', 'text-white', 'shadow-sm');
         }
 
-        function openLoginModal() { document.getElementById('login-modal').classList.remove('hidden'); }
+        // トースト通知を表示する関数
+        function showWelcomeToast(name) {
+            const toast = document.getElementById('toast-notification');
+            document.getElementById('toast-title').textContent = `ようこそ、${name} さん！`;
+            document.getElementById('toast-desc').textContent = 'ログインに成功しました。すべての機能を利用できます。';
+            
+            toast.classList.remove('translate-x-full', 'opacity-0');
+            toast.classList.add('translate-x-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-x-0', 'opacity-100');
+                toast.classList.add('translate-x-full', 'opacity-0');
+            }, 4000); // 4秒後に自動消滅
+        }
+
+        function openLoginModal() {
+            document.getElementById('login-error-msg').classList.add('hidden');
+            document.getElementById('login-user').value = '';
+            document.getElementById('login-pass').value = '';
+            document.getElementById('login-modal').classList.remove('hidden');
+        }
         function closeLoginModal() { document.getElementById('login-modal').classList.add('hidden'); }
 
         // ログイン処理
@@ -403,7 +467,7 @@
             currentUser = user;
             closeLoginModal();
             updateAuthUI();
-            alert(`${user.sei} ${user.mei} さん、ようこそ！`);
+            showWelcomeToast(`${user.sei} ${user.mei}`);
         }
 
         function handleLogout() {
@@ -415,20 +479,42 @@
         function updateAuthUI() {
             const badge = document.getElementById('user-status-badge');
             const authBtn = document.getElementById('auth-action-btn');
+            const navAdmin = document.getElementById('nav-admin');
+            const featureCards = document.getElementById('home-feature-cards');
+            const homeSubtitle = document.getElementById('home-subtitle');
 
             if (currentUser) {
                 badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> ${currentUser.sei} ${currentUser.mei} (${currentUser.username})`;
                 authBtn.textContent = 'ログアウト';
                 authBtn.onclick = handleLogout;
+                
+                // ログイン成功時はホームにたくさんの機能カードを表示
+                featureCards.classList.remove('hidden');
+                homeSubtitle.textContent = 'ログイン中のアカウントですべての機能・ファイル共有・お知らせを利用可能です。';
+
+                // 管理者権限（neverLock が true のユーザー）の場合のみユーザー管理タブを表示
+                if (currentUser.neverLock) {
+                    navAdmin.classList.remove('hidden');
+                } else {
+                    navAdmin.classList.add('hidden');
+                }
             } else {
                 badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-400"></span> ゲスト閲覧中`;
                 authBtn.textContent = 'ログイン';
                 authBtn.onclick = openLoginModal;
+
+                // ゲスト状態の時は機能カードを非表示にする
+                featureCards.classList.add('hidden');
+                homeSubtitle.textContent = '現在ゲスト閲覧中です。すべての機能を利用するにはログインしてください。';
+                navAdmin.classList.add('hidden');
             }
         }
 
-        // 管理者ページアクセス制御
+        // 管理者ページアクセス制御（毎回パスワード入力欄をまっさらにする）
         function requestAdminAccess() {
+            const passInput = document.getElementById('admin-secret-pass');
+            passInput.value = ''; // 開くたびにまっさらにする
+            document.getElementById('admin-pass-error').classList.add('hidden');
             document.getElementById('admin-pass-modal').classList.remove('hidden');
         }
         function closeAdminPassModal() { document.getElementById('admin-pass-modal').classList.add('hidden'); }
@@ -481,24 +567,25 @@
             renderAdminUserList();
         }
 
-        // ユーザー一覧表示
+        // ユーザー一覧表示（姓と名の間に全角スペース1文字）
         function renderAdminUserList() {
             const tbody = document.getElementById('admin-user-list-tbody');
             tbody.innerHTML = '';
             registeredUsers.forEach((user, index) => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-white/40 cursor-pointer";
+                tr.className = "hover:bg-white/40";
                 tr.innerHTML = `
                     <td class="p-3 font-mono">${user.adminId}</td>
                     <td class="p-3 font-semibold">${user.sei} ${user.mei}</td>
                     <td class="p-3 font-mono">${user.username}</td>
                     <td class="p-3">
                         ${user.isLocked ? '<span class="px-2 py-0.5 rounded bg-rose-100 text-rose-700 font-bold">ロック中</span>' : '<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">正常</span>'}
-                        ${user.neverLock ? '<span class="ml-1 px-2 py-0.5 rounded bg-purple-100 text-purple-700">ロック除外</span>' : ''}
+                        ${user.neverLock ? '<span class="ml-1 px-2 py-0.5 rounded bg-purple-100 text-purple-700">管理者</span>' : ''}
                     </td>
                     <td class="p-3 text-right space-x-2">
                         <button onclick="showUserDetail(${index})" class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-[11px] font-bold">詳細</button>
                         ${user.isLocked ? `<button onclick="unlockUser(${index})" class="px-2 py-1 bg-amber-500 text-white rounded text-[11px] font-bold">最有効化</button>` : ''}
+                        <button onclick="deleteUser(${index})" class="px-2 py-1 bg-rose-500 text-white rounded text-[11px] font-bold">削除</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -516,11 +603,24 @@
                 <p><b>ユーザー名:</b> ${user.username}</p>
                 <p><b>パスワード:</b> <span class="font-mono bg-white px-2 py-0.5 rounded border">${user.password}</span></p>
                 <p><b>ステータス:</b> ${user.isLocked ? 'ロック中' : '正常'}</p>
-                <p><b>ロック除外:</b> ${user.neverLock ? 'はい' : 'いいえ'}</p>
+                <p><b>管理者権限(ロック除外):</b> ${user.neverLock ? 'はい' : 'いいえ'}</p>
             `;
             document.getElementById('user-detail-modal').classList.remove('hidden');
         }
         function closeUserDetailModal() { document.getElementById('user-detail-modal').classList.add('hidden'); }
+
+        // アカウント削除機能
+        function deleteUser(index) {
+            if (registeredUsers.length <= 1) {
+                alert('最後のユーザーは削除できません。');
+                return;
+            }
+            if (confirm(`ユーザー「${registeredUsers[index].sei} ${registeredUsers[index].mei}」を削除してもよろしいですか？`)) {
+                registeredUsers.splice(index, 1);
+                saveUsers();
+                renderAdminUserList();
+            }
+        }
 
         // アカウント再有効化（ロック解除）
         function unlockUser(index) {
