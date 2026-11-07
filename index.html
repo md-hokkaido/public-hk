@@ -9,7 +9,7 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Zen+Maru+Gothic:wght@400;500;700&display=swap');
 
         body {
             font-family: 'Zen Maru Gothic', 'Plus Jakarta Sans', sans-serif;
@@ -106,7 +106,7 @@
         }
 
         /* -------------------------------------- */
-        /* オリジナル・ローディングアニメーション CSS */
+        /* サイバー＆モダン・スタイリッシュ ローダー  */
         /* -------------------------------------- */
         #page-loader {
             position: fixed;
@@ -116,91 +116,114 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 50%, #fbc2eb 100%);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
+            transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         #page-loader.loader-hidden {
             opacity: 0;
-            transform: scale(1.05);
+            transform: scale(1.1);
             pointer-events: none;
         }
 
-        .loader-logo-box {
+        .cyber-logo-wrapper {
             position: relative;
-            width: 88px;
-            height: 88px;
-            border-radius: 1.75rem;
-            background: linear-gradient(135deg, #a855f7, #6366f1);
+            width: 110px;
+            height: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cyber-logo-core {
+            width: 76px;
+            height: 76px;
+            border-radius: 1.5rem;
+            background: linear-gradient(135deg, #c084fc, #6366f1);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 2.25rem;
+            font-size: 2rem;
             font-weight: 800;
-            box-shadow: 0 16px 40px rgba(168, 85, 247, 0.35);
-            animation: pulseGlow 3s ease-in-out infinite alternate, float 5s ease-in-out infinite;
+            letter-spacing: -0.05em;
+            box-shadow: 0 0 35px rgba(168, 85, 247, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.4);
+            animation: coreBreath 2s ease-in-out infinite alternate;
         }
 
-        .loader-logo-ring {
+        /* 外側のリングアニメーション（正回転） */
+        .cyber-ring-outer {
             position: absolute;
-            inset: -10px;
-            border-radius: 2.25rem;
-            border: 2px solid rgba(255, 255, 255, 0.6);
-            animation: ringSpin 8s linear infinite;
+            inset: 0;
+            border-radius: 2rem;
+            border: 2px solid transparent;
+            border-top-color: #a855f7;
+            border-right-color: #38bdf8;
+            animation: spinClockwise 1.8s linear infinite;
         }
 
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 12px 30px rgba(168, 85, 247, 0.3); }
-            100% { box-shadow: 0 24px 50px rgba(168, 85, 247, 0.65), 0 0 30px rgba(255, 255, 255, 0.8); }
+        /* 内側のリングアニメーション（逆回転） */
+        .cyber-ring-inner {
+            position: absolute;
+            inset: -8px;
+            border-radius: 2.3rem;
+            border: 2px solid transparent;
+            border-bottom-color: #f43f5e;
+            border-left-color: #818cf8;
+            animation: spinCounterClockwise 2.4s linear infinite;
         }
 
-        @keyframes ringSpin {
+        @keyframes spinClockwise {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
-        .loader-progress-bar {
-            width: 180px;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.4);
+        @keyframes spinCounterClockwise {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-360deg); }
+        }
+
+        @keyframes coreBreath {
+            0% { transform: scale(0.96); box-shadow: 0 0 25px rgba(168, 85, 247, 0.6); }
+            100% { transform: scale(1.04); box-shadow: 0 0 50px rgba(168, 85, 247, 1), 0 0 20px rgba(56, 189, 248, 0.8); }
+        }
+
+        /* ネオンラインプログレスバー */
+        .neon-bar-bg {
+            width: 160px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 9999px;
             overflow: hidden;
             position: relative;
-            backdrop-filter: blur(4px);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
 
-        .loader-progress-fill {
+        .neon-bar-fill {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #a855f7, #6366f1, #ec4899);
+            background: linear-gradient(90deg, #ec4899, #a855f7, #38bdf8);
             border-radius: 9999px;
-            transition: width 0.3s ease-out;
+            box-shadow: 0 0 12px #38bdf8;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
     </style>
 </head>
 <body class="relative min-h-screen pb-16">
 
-    <!-- オリジナル・ローディング画面 -->
+    <!-- サイバー＆スタイリッシュ ローディング画面 -->
     <div id="page-loader">
-        <div class="space-y-6 text-center flex flex-col items-center">
-            <div class="loader-logo-box">
-                <div class="loader-logo-ring"></div>
-                HK
+        <div class="flex flex-col items-center gap-10">
+            <div class="cyber-logo-wrapper">
+                <div class="cyber-ring-inner"></div>
+                <div class="cyber-ring-outer"></div>
+                <div class="cyber-logo-core">
+                    HK
+                </div>
             </div>
-            <div class="space-y-2">
-                <h3 class="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600 tracking-tight">
-                    HK - Portal
-                </h3>
-                <p id="loader-status-text" class="text-xs font-semibold text-slate-500 tracking-wider">
-                    システムをロード中...
-                </p>
-            </div>
-            <!-- プログレスバー -->
-            <div class="loader-progress-bar">
-                <div id="loader-progress-fill" class="loader-progress-fill"></div>
+            <!-- プログレスネオンバー -->
+            <div class="neon-bar-bg">
+                <div id="neon-bar-fill" class="neon-bar-fill"></div>
             </div>
         </div>
     </div>
@@ -591,30 +614,23 @@
         ];
 
         // --------------------------------------
-        // ローディングアニメーション制御処理
+        // スタイリッシュ・ローダー制御
         // --------------------------------------
         function initPageLoader() {
             const loader = document.getElementById('page-loader');
-            const fill = document.getElementById('loader-progress-fill');
-            const statusText = document.getElementById('loader-status-text');
+            const fill = document.getElementById('neon-bar-fill');
 
             if (!loader || !fill) return;
 
-            // プログレスバーアニメーション
-            setTimeout(() => { fill.style.width = '35%'; }, 100);
-            setTimeout(() => { 
-                fill.style.width = '75%';
-                if (statusText) statusText.textContent = 'コンポーネントを準備中...';
-            }, 400);
-            setTimeout(() => { 
-                fill.style.width = '100%';
-                if (statusText) statusText.textContent = '読み込み完了！';
-            }, 700);
+            // スムーズなラインメーターのアニメーション
+            setTimeout(() => { fill.style.width = '45%'; }, 80);
+            setTimeout(() => { fill.style.width = '85%'; }, 350);
+            setTimeout(() => { fill.style.width = '100%'; }, 650);
 
-            // ローダーをフェードアウトさせて非表示化
+            // ローダーのフェードアウト ＆ スケールアウト
             setTimeout(() => {
                 loader.classList.add('loader-hidden');
-            }, 1000);
+            }, 850);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
