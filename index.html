@@ -84,8 +84,8 @@
             z-index: 0;
         }
 
-        /* トースト通知アニメーション */
-        #toast-notification {
+        /* 画面中央の派手なウェルカムポップアップ */
+        #center-welcome-modal {
             transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
     </style>
@@ -96,12 +96,18 @@
     <div class="bubble w-72 h-72 top-10 left-10 float-animation"></div>
     <div class="bubble w-96 h-96 bottom-10 right-10 float-animation-delayed"></div>
 
-    <!-- トースト通知 (ようこそポップアップ) -->
-    <div id="toast-notification" class="fixed top-20 right-6 z-50 transform translate-x-full opacity-0 glass-card px-6 py-4 shadow-xl border-purple-200 bg-white/90 flex items-center gap-3">
-        <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold">✨</div>
-        <div>
-            <h4 id="toast-title" class="font-bold text-sm text-slate-800">ようこそ！</h4>
-            <p id="toast-desc" class="text-xs text-slate-500">ログインに成功しました。</p>
+    <!-- 画面中央の派手なウェルカムポップアップ -->
+    <div id="center-welcome-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-4 hidden opacity-0 scale-90 transition-all duration-300 pointer-events-none">
+        <div class="glass-card max-w-lg w-full p-8 text-center bg-white/95 shadow-2xl border-purple-300 space-y-4 soft-glow">
+            <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500 text-white flex items-center justify-center mx-auto text-3xl shadow-lg float-animation">
+                ✨
+            </div>
+            <h2 id="welcome-modal-title" class="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
+                ようこそ！
+            </h2>
+            <p id="welcome-modal-desc" class="text-slate-600 text-base">
+                ログインに成功しました。すべての機能をお楽しみください。
+            </p>
         </div>
     </div>
 
@@ -133,6 +139,9 @@
                 </button>
                 <button onclick="switchTab('security')" id="nav-security" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-600 hover:bg-white/60">
                     <i data-lucide="shield-check" class="w-4 h-4"></i> セキュリティ学習
+                </button>
+                <button onclick="switchTab('roles')" id="nav-roles" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-600 hover:bg-white/60">
+                    <i data-lucide="users" class="w-4 h-4 text-purple-600"></i> ロール管理
                 </button>
                 <!-- 管理者用タブ (初期は非表示) -->
                 <button onclick="requestAdminAccess()" id="nav-admin" class="nav-btn hidden px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-purple-700 bg-purple-100 hover:bg-purple-200">
@@ -170,6 +179,19 @@
                 </div>
             </div>
 
+            <!-- 「安全でシンプルな...」の下に追加した、同じ長さのお知らせ一覧ブロック -->
+            <div class="glass-card p-6 md:p-8 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-200/60 pb-3">
+                    <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+                        <i data-lucide="megaphone" class="text-amber-500"></i> 最新のお知らせ一覧
+                    </h3>
+                    <button onclick="switchTab('news')" class="text-xs font-bold text-purple-600 hover:underline">すべて見る →</button>
+                </div>
+                <div id="home-news-preview" class="space-y-3">
+                    <!-- JS描画 -->
+                </div>
+            </div>
+
             <!-- ログイン後に表示される機能ショートカットカード群 -->
             <div id="home-feature-cards" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div onclick="switchTab('files')" class="glass-card p-6 cursor-pointer group float-animation">
@@ -184,8 +206,8 @@
                     <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mb-4 group-hover:scale-110 transition">
                         <i data-lucide="megaphone" class="w-6 h-6"></i>
                     </div>
-                    <h3 class="font-bold text-lg text-slate-800 mb-1">お知らせ一覧</h3>
-                    <p class="text-xs text-slate-500">最新情報・連絡事項の確認</p>
+                    <h3 class="font-bold text-lg text-slate-800 mb-1">お知らせ管理・一覧</h3>
+                    <p class="text-xs text-slate-500">最新情報・連絡事項の確認と作成・編集</p>
                 </div>
 
                 <div onclick="switchTab('security')" class="glass-card p-6 cursor-pointer group float-animation-slow">
@@ -213,22 +235,107 @@
             </div>
         </section>
 
-        <!-- NEWS -->
+        <!-- NEWS (お知らせ一覧 ＆ 管理者/許可ロールによる追加・編集) -->
         <section id="tab-news" class="page-tab space-y-6">
-            <div class="glass-card p-6 md:p-8">
-                <h2 class="text-2xl font-bold text-slate-800 mb-4">お知らせ</h2>
-                <div class="p-4 bg-white/70 rounded-2xl">
-                    <h3 class="font-bold">ポータルシステムを更新しました</h3>
-                    <p class="text-xs text-slate-600 mt-1">厳格な認証システムと管理者管理機能が導入されました。</p>
+            <div class="glass-card p-6 md:p-8 space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/60 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="bell" class="text-amber-500"></i> お知らせ管理・一覧
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">ポータルの最新情報・連絡事項の確認および投稿・編集</p>
+                    </div>
+                    <button id="add-news-btn" onclick="openNewsModal()" class="hidden px-4 py-2 rounded-xl bg-purple-600 text-white font-semibold text-xs flex items-center gap-2 shadow-sm hover:bg-purple-700 transition">
+                        <i data-lucide="plus" class="w-4 h-4"></i> お知らせを追加
+                    </button>
+                </div>
+
+                <div id="news-container" class="space-y-4">
+                    <!-- JS描画 -->
                 </div>
             </div>
         </section>
 
-        <!-- SECURITY LEARNING -->
+        <!-- SECURITY LEARNING (復元されたセキュリティ学習デモ) -->
         <section id="tab-security" class="page-tab space-y-8">
             <div class="glass-card p-6 md:p-8">
-                <h2 class="text-2xl font-bold text-slate-800 mb-4">セキュリティ学習</h2>
-                <p class="text-xs text-slate-600">脆弱性デモや対策について学習できます。</p>
+                <div class="mb-6 border-b border-slate-200/60 pb-4">
+                    <div class="flex items-center gap-2">
+                        <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">誰でもアクセス可能</span>
+                        <span class="px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-bold">インタラクティブ学習</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800 mt-2 flex items-center gap-2">
+                        <i data-lucide="shield-alert" class="text-rose-500"></i> サイバー攻撃デモ ＆ セキュリティ学習
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">Webサイトに潜む脆弱性の仕組みと防衛プログラミングを学びます。</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- SQLi -->
+                    <div class="bg-white/70 rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                <i data-lucide="database" class="w-5 h-5 text-purple-500"></i> SQLインジェクション体験
+                            </h3>
+                            <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded font-medium">危険度: 高</span>
+                        </div>
+                        <p class="text-xs text-slate-600">入力フォームに意図しないSQLコードを注入し、認証を突破する攻撃デモです。</p>
+
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-xs font-bold text-slate-600 block mb-1">ユーザー名入力:</label>
+                                <input type="text" id="sqli-input-user" value="' OR '1'='1" class="w-full text-xs p-2.5 rounded-xl glass-input font-mono">
+                            </div>
+                            <button onclick="runSqliDemo()" class="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition">
+                                ログイン実行 (デモ)
+                            </button>
+                        </div>
+                        <div id="sqli-result" class="p-3 rounded-xl text-xs hidden"></div>
+                    </div>
+
+                    <!-- XSS -->
+                    <div class="bg-white/70 rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                <i data-lucide="code" class="w-5 h-5 text-indigo-500"></i> XSS (クロスサイトスクリプティング)
+                            </h3>
+                            <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-medium">危険度: 中〜高</span>
+                        </div>
+                        <p class="text-xs text-slate-600">悪意あるJavaScriptコードを投稿し、画面で実行させる攻撃デモです。</p>
+
+                        <div class="space-y-3">
+                            <input type="text" id="xss-input" value="<script>alert('XSS攻撃成功!')</script>" class="w-full text-xs p-2.5 rounded-xl glass-input font-mono">
+                            <div class="flex gap-2">
+                                <button onclick="runXssDemo(false)" class="flex-1 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition">対策なし出力</button>
+                                <button onclick="runXssDemo(true)" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition">エスケープ出力</button>
+                            </div>
+                        </div>
+                        <div class="bg-slate-100 p-3 rounded-xl min-h-[50px]">
+                            <div id="xss-output" class="text-xs text-slate-800 font-sans"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ROLES MANAGEMENT (ユーザーロール作成・割り当てページ) -->
+        <section id="tab-roles" class="page-tab space-y-6">
+            <div class="glass-card p-6 md:p-8 space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/60 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="users" class="text-purple-600"></i> ユーザーロール作成・割り当て
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">ポータル内の新しい権限ロール（お知らせ編集権限など）を自由に作成・管理できます。</p>
+                    </div>
+                    <button onclick="openRoleCreateModal()" class="px-4 py-2 rounded-xl bg-purple-600 text-white font-semibold text-xs flex items-center gap-2 shadow-sm hover:bg-purple-700 transition">
+                        <i data-lucide="plus" class="w-4 h-4"></i> 新しいロールを作成
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="roles-grid">
+                    <!-- JS描画 -->
+                </div>
             </div>
         </section>
 
@@ -238,7 +345,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/60 pb-4">
                     <div>
                         <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                            <i data-lucide="users" class="text-purple-600"></i> ユーザー管理 (管理者専用)
+                            <i data-lucide="shield" class="text-purple-600"></i> ユーザー管理 (管理者専用)
                         </h2>
                         <p class="text-xs text-slate-500 mt-1">新規ユーザーの個別登録、CSV一括登録、アカウントロック解除・削除を行えます。</p>
                     </div>
@@ -302,6 +409,7 @@
                                     <th class="p-3">管理ID</th>
                                     <th class="p-3">名前</th>
                                     <th class="p-3">ユーザー名</th>
+                                    <th class="p-3">ロール</th>
                                     <th class="p-3">状態</th>
                                     <th class="p-3 text-right">操作</th>
                                 </tr>
@@ -351,10 +459,35 @@
             </div>
             <p class="text-xs text-slate-600">管理者ページにアクセスするにはパスワードを入力してください。</p>
             <form onsubmit="verifyAdminPassword(event)" class="space-y-4">
-                <!-- autocomplete="off" を追加してオートコンプリートによる記憶・自動入力を防止 -->
                 <input type="password" id="admin-secret-pass" autocomplete="new-password" required placeholder="パスワードを入力" class="w-full text-sm p-3 rounded-xl glass-input">
                 <div id="admin-pass-error" class="text-xs text-rose-600 font-bold hidden">パスワードが正しくありません</div>
                 <button type="submit" class="w-full py-3 rounded-xl bg-purple-600 text-white font-bold text-sm">認証する</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- お知らせ追加・編集モーダル -->
+    <div id="news-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-lg w-full p-6 space-y-6 bg-white/95">
+            <div class="flex items-center justify-between">
+                <h3 id="news-modal-title" class="font-bold text-xl text-slate-800 flex items-center gap-2"><i data-lucide="plus-circle" class="text-purple-600"></i> お知らせ投稿</h3>
+                <button onclick="closeNewsModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="handleSaveNews(event)" class="space-y-4">
+                <input type="hidden" id="news-edit-id">
+                <div>
+                    <label class="text-xs font-bold text-slate-600 block mb-1">カテゴリ</label>
+                    <input type="text" id="news-cat-input" required placeholder="例: 重要, 連絡" class="w-full text-sm p-3 rounded-xl glass-input">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-600 block mb-1">タイトル</label>
+                    <input type="text" id="news-title-input" required class="w-full text-sm p-3 rounded-xl glass-input">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-600 block mb-1">本文</label>
+                    <textarea id="news-content-input" rows="4" required class="w-full text-sm p-3 rounded-xl glass-input"></textarea>
+                </div>
+                <button type="submit" class="w-full py-3 rounded-xl bg-purple-600 text-white font-bold text-sm shadow-md">保存する</button>
             </form>
         </div>
     </div>
@@ -377,18 +510,34 @@
     <script>
         let currentUser = null;
 
-        // 初期ユーザーデータ（デフォルト管理者: admin / パスワード: Admin1234 / ロック除外設定 true）
+        // ロール定義データ
+        let rolesList = JSON.parse(localStorage.getItem('hk_portal_roles')) || [
+            { id: 'admin', name: 'システム管理者 (system_administrator)', desc: '全設定の変更、ユーザー管理、お知らせの全権限' },
+            { id: 'editor', name: 'お知らせエディター', desc: 'お知らせの追加・編集・削除ができる権限' },
+            { id: 'general', name: '一般ユーザー', desc: '通常の閲覧およびファイル共有権限' }
+        ];
+
+        // 登録ユーザーデータ
         let registeredUsers = JSON.parse(localStorage.getItem('hk_portal_users')) || [
-            { adminId: 'ADM-001', sei: '管理者', mei: '太郎', username: 'admin', password: 'Admin1234', neverLock: true, failedAttempts: 0, isLocked: false }
+            { adminId: 'ADM-001', sei: 'システム', mei: '管理者', username: 'admin', password: 'Admin1234', role: 'admin', neverLock: true, failedAttempts: 0, isLocked: false }
+        ];
+
+        // お知らせデータ
+        let newsList = JSON.parse(localStorage.getItem('hk_portal_news')) || [
+            { id: 1, title: 'HK - Portal をセキュリティ強化版で公開しました', date: '2026-11-07', category: '重要', author: 'システム管理者', content: '新しいポータルサイトへようこそ。厳格な認証とロール管理が有効になっています。' }
         ];
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             updateAuthUI();
+            renderNewsList();
+            renderRolesList();
         });
 
-        function saveUsers() {
+        function saveStorage() {
             localStorage.setItem('hk_portal_users', JSON.stringify(registeredUsers));
+            localStorage.setItem('hk_portal_news', JSON.stringify(newsList));
+            localStorage.setItem('hk_portal_roles', JSON.stringify(rolesList));
         }
 
         function switchTab(tabId) {
@@ -402,19 +551,19 @@
             if (activeNav) activeNav.classList.add('bg-purple-500', 'text-white', 'shadow-sm');
         }
 
-        // トースト通知を表示する関数
-        function showWelcomeToast(name) {
-            const toast = document.getElementById('toast-notification');
-            document.getElementById('toast-title').textContent = `ようこそ、${name} さん！`;
-            document.getElementById('toast-desc').textContent = 'ログインに成功しました。すべての機能を利用できます。';
+        // 画面中央の派手なウェルカムポップアップを表示
+        function showCenterWelcomeModal(name) {
+            const modal = document.getElementById('center-welcome-modal');
+            document.getElementById('welcome-modal-title').textContent = `ようこそ、${name} さん！`;
             
-            toast.classList.remove('translate-x-full', 'opacity-0');
-            toast.classList.add('translate-x-0', 'opacity-100');
+            modal.classList.remove('hidden', 'opacity-0', 'scale-90', 'pointer-events-none');
+            modal.classList.add('opacity-100', 'scale-100');
 
             setTimeout(() => {
-                toast.classList.remove('translate-x-0', 'opacity-100');
-                toast.classList.add('translate-x-full', 'opacity-0');
-            }, 4000); // 4秒後に自動消滅
+                modal.classList.remove('opacity-100', 'scale-100');
+                modal.classList.add('opacity-0', 'scale-90');
+                setTimeout(() => modal.classList.add('hidden', 'pointer-events-none'), 300);
+            }, 3500); // 3.5秒後に自動消滅
         }
 
         function openLoginModal() {
@@ -456,18 +605,18 @@
                         user.isLocked = true;
                         errorMsg.textContent = '5回連続で間違えたため、アカウントがロックされました。';
                     }
-                    saveUsers();
+                    saveStorage();
                 }
                 return;
             }
 
             // ログイン成功
             user.failedAttempts = 0;
-            saveUsers();
+            saveStorage();
             currentUser = user;
             closeLoginModal();
             updateAuthUI();
-            showWelcomeToast(`${user.sei} ${user.mei}`);
+            showCenterWelcomeModal(`${user.sei} ${user.mei}`);
         }
 
         function handleLogout() {
@@ -482,38 +631,48 @@
             const navAdmin = document.getElementById('nav-admin');
             const featureCards = document.getElementById('home-feature-cards');
             const homeSubtitle = document.getElementById('home-subtitle');
+            const addNewsBtn = document.getElementById('add-news-btn');
 
             if (currentUser) {
-                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> ${currentUser.sei} ${currentUser.mei} (${currentUser.username})`;
+                const roleObj = rolesList.find(r => r.id === currentUser.role);
+                const roleName = roleObj ? roleObj.name : currentUser.role;
+                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> ${currentUser.sei} ${currentUser.mei} (${roleName})`;
                 authBtn.textContent = 'ログアウト';
                 authBtn.onclick = handleLogout;
                 
-                // ログイン成功時はホームにたくさんの機能カードを表示
                 featureCards.classList.remove('hidden');
                 homeSubtitle.textContent = 'ログイン中のアカウントですべての機能・ファイル共有・お知らせを利用可能です。';
 
-                // 管理者権限（neverLock が true のユーザー）の場合のみユーザー管理タブを表示
-                if (currentUser.neverLock) {
+                // 管理者権限（neverLock または adminロール）の場合
+                if (currentUser.neverLock || currentUser.role === 'admin') {
                     navAdmin.classList.remove('hidden');
                 } else {
                     navAdmin.classList.add('hidden');
+                }
+
+                // 管理者またはエディター権限を持つ場合にお知らせ追加ボタンを表示
+                if (currentUser.role === 'admin' || currentUser.role === 'editor' || currentUser.neverLock) {
+                    addNewsBtn.classList.remove('hidden');
+                } else {
+                    addNewsBtn.classList.add('hidden');
                 }
             } else {
                 badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-400"></span> ゲスト閲覧中`;
                 authBtn.textContent = 'ログイン';
                 authBtn.onclick = openLoginModal;
 
-                // ゲスト状態の時は機能カードを非表示にする
                 featureCards.classList.add('hidden');
                 homeSubtitle.textContent = '現在ゲスト閲覧中です。すべての機能を利用するにはログインしてください。';
                 navAdmin.classList.add('hidden');
+                addNewsBtn.classList.add('hidden');
             }
+            renderNewsList();
         }
 
-        // 管理者ページアクセス制御（毎回パスワード入力欄をまっさらにする）
+        // 管理者ページアクセス制御
         function requestAdminAccess() {
             const passInput = document.getElementById('admin-secret-pass');
-            passInput.value = ''; // 開くたびにまっさらにする
+            passInput.value = '';
             document.getElementById('admin-pass-error').classList.add('hidden');
             document.getElementById('admin-pass-modal').classList.remove('hidden');
         }
@@ -559,9 +718,9 @@
             }
 
             registeredUsers.push({
-                adminId, sei, mei, username, password, neverLock, failedAttempts: 0, isLocked: false
+                adminId, sei, mei, username, password, role: neverLock ? 'admin' : 'general', neverLock, failedAttempts: 0, isLocked: false
             });
-            saveUsers();
+            saveStorage();
             alert('ユーザーを登録しました。');
             e.target.reset();
             renderAdminUserList();
@@ -579,8 +738,12 @@
                     <td class="p-3 font-semibold">${user.sei} ${user.mei}</td>
                     <td class="p-3 font-mono">${user.username}</td>
                     <td class="p-3">
+                        <select onchange="changeUserRole(${index}, this.value)" class="text-xs p-1 rounded bg-white border">
+                            ${rolesList.map(r => `<option value="${r.id}" ${user.role === r.id ? 'selected' : ''}>${r.name}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td class="p-3">
                         ${user.isLocked ? '<span class="px-2 py-0.5 rounded bg-rose-100 text-rose-700 font-bold">ロック中</span>' : '<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">正常</span>'}
-                        ${user.neverLock ? '<span class="ml-1 px-2 py-0.5 rounded bg-purple-100 text-purple-700">管理者</span>' : ''}
                     </td>
                     <td class="p-3 text-right space-x-2">
                         <button onclick="showUserDetail(${index})" class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-[11px] font-bold">詳細</button>
@@ -593,6 +756,11 @@
             lucide.createIcons();
         }
 
+        function changeUserRole(index, newRole) {
+            registeredUsers[index].role = newRole;
+            saveStorage();
+        }
+
         // ユーザー詳細表示
         function showUserDetail(index) {
             const user = registeredUsers[index];
@@ -602,8 +770,8 @@
                 <p><b>名前:</b> ${user.sei} ${user.mei}</p>
                 <p><b>ユーザー名:</b> ${user.username}</p>
                 <p><b>パスワード:</b> <span class="font-mono bg-white px-2 py-0.5 rounded border">${user.password}</span></p>
+                <p><b>ロール:</b> ${user.role}</p>
                 <p><b>ステータス:</b> ${user.isLocked ? 'ロック中' : '正常'}</p>
-                <p><b>管理者権限(ロック除外):</b> ${user.neverLock ? 'はい' : 'いいえ'}</p>
             `;
             document.getElementById('user-detail-modal').classList.remove('hidden');
         }
@@ -617,7 +785,7 @@
             }
             if (confirm(`ユーザー「${registeredUsers[index].sei} ${registeredUsers[index].mei}」を削除してもよろしいですか？`)) {
                 registeredUsers.splice(index, 1);
-                saveUsers();
+                saveStorage();
                 renderAdminUserList();
             }
         }
@@ -626,16 +794,16 @@
         function unlockUser(index) {
             registeredUsers[index].isLocked = false;
             registeredUsers[index].failedAttempts = 0;
-            saveUsers();
+            saveStorage();
             alert('アカウントを再有効化しました。');
             renderAdminUserList();
         }
 
         // CSVダウンロード
         function downloadUsersCSV() {
-            let csv = '管理ID,姓,名,ユーザー名,パスワード,ロック除外\n';
+            let csv = '管理ID,姓,名,ユーザー名,パスワード,ロール\n';
             registeredUsers.forEach(u => {
-                csv += `"${u.adminId}","${u.sei}","${u.mei}","${u.username}","${u.password}","${u.neverLock}"\n`;
+                csv += `"${u.adminId}","${u.sei}","${u.mei}","${u.username}","${u.password}","${u.role}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
@@ -668,18 +836,161 @@
                             mei: cols[2],
                             username: cols[3],
                             password: cols[4],
-                            neverLock: cols[5] === 'true',
+                            role: cols[5] || 'general',
                             failedAttempts: 0,
                             isLocked: false
                         });
                         count++;
                     }
                 }
-                saveUsers();
+                saveStorage();
                 alert(`${count} 件のユーザーをインポートしました。`);
                 renderAdminUserList();
             };
             reader.readAsText(file);
+        }
+
+        // お知らせ機能関連
+        function renderNewsList() {
+            const container = document.getElementById('news-container');
+            const homePreview = document.getElementById('home-news-preview');
+            container.innerHTML = '';
+            homePreview.innerHTML = '';
+
+            const canEdit = currentUser && (currentUser.role === 'admin' || currentUser.role === 'editor' || currentUser.neverLock);
+
+            newsList.forEach((news, index) => {
+                // 管理者・編集権限がある場合のみ編集・削除ボタンを表示
+                const actionBtns = canEdit ? `
+                    <div class="flex gap-2 mt-2">
+                        <button onclick="editNews(${index})" class="px-2.5 py-1 bg-purple-100 text-purple-700 rounded text-xs font-bold">編集</button>
+                        <button onclick="deleteNews(${index})" class="px-2.5 py-1 bg-rose-500 text-white rounded text-xs font-bold">削除</button>
+                    </div>
+                ` : '';
+
+                const itemHTML = `
+                    <div class="p-4 rounded-2xl bg-white/80 border border-slate-200/80 shadow-sm space-y-1">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700">${news.category}</span>
+                            <span class="text-xs text-slate-400">${news.date} (${news.author})</span>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-sm">${news.title}</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed">${news.content}</p>
+                        ${actionBtns}
+                    </div>
+                `;
+                container.innerHTML += itemHTML;
+
+                if (index < 2) { // ホーム画面には最新2件を表示
+                    homePreview.innerHTML += itemHTML;
+                }
+            });
+            lucide.createIcons();
+        }
+
+        function openNewsModal() {
+            document.getElementById('news-edit-id').value = '';
+            document.getElementById('news-cat-input').value = '';
+            document.getElementById('news-title-input').value = '';
+            document.getElementById('news-content-input').value = '';
+            document.getElementById('news-modal-title.textContent') = 'お知らせ投稿';
+            document.getElementById('news-modal').classList.remove('hidden');
+        }
+        function closeNewsModal() { document.getElementById('news-modal').classList.add('hidden'); }
+
+        function handleSaveNews(e) {
+            e.preventDefault();
+            const editId = document.getElementById('news-edit-id').value;
+            const category = document.getElementById('news-cat-input').value;
+            const title = document.getElementById('news-title-input').value;
+            const content = document.getElementById('news-content-input').value;
+
+            if (editId !== '') {
+                newsList[editId].category = category;
+                newsList[editId].title = title;
+                newsList[editId].content = content;
+            } else {
+                newsList.unshift({
+                    id: Date.now(),
+                    category,
+                    title,
+                    content,
+                    date: new Date().toISOString().split('T')[0],
+                    author: `${currentUser.sei} ${currentUser.mei}`
+                });
+            }
+            saveStorage();
+            closeNewsModal();
+            renderNewsList();
+        }
+
+        function editNews(index) {
+            const news = newsList[index];
+            document.getElementById('news-edit-id').value = index;
+            document.getElementById('news-cat-input').value = news.category;
+            document.getElementById('news-title-input').value = news.title;
+            document.getElementById('news-content-input').value = news.content;
+            document.getElementById('news-modal').classList.remove('hidden');
+        }
+
+        function deleteNews(index) {
+            if (confirm('このお知らせを削除してもよろしいですか？')) {
+                newsList.splice(index, 1);
+                saveStorage();
+                renderNewsList();
+            }
+        }
+
+        // ロール管理ページ関連
+        function renderRolesList() {
+            const grid = document.getElementById('roles-grid');
+            grid.innerHTML = '';
+            rolesList.forEach((role, index) => {
+                grid.innerHTML += `
+                    <div class="p-5 rounded-2xl bg-white/80 border border-slate-200 shadow-sm space-y-2">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-slate-800 text-sm">${role.name}</h4>
+                            <span class="text-[10px] font-mono bg-purple-100 text-purple-700 px-2 py-0.5 rounded">ID: ${role.id}</span>
+                        </div>
+                        <p class="text-xs text-slate-500">${role.desc}</p>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        function openRoleCreateModal() {
+            const rId = prompt('ロールIDを入力してください（例: editor）:');
+            if (!rId) return;
+            const rName = prompt('ロール名を入力してください（例: お知らせ編集者）:');
+            if (!rName) return;
+            const rDesc = prompt('ロールの説明を入力してください:');
+
+            rolesList.push({ id: rId, name: rName, desc: rDesc || '' });
+            saveStorage();
+            renderRolesList();
+            alert('新しいロールを作成しました。ユーザー管理画面から割り当てを変更できます。');
+        }
+
+        // セキュリティ学習デモ機能
+        function runSqliDemo() {
+            const u = document.getElementById('sqli-input-user').value;
+            const res = document.getElementById('sqli-result');
+            res.classList.remove('hidden');
+            if (u.includes("' OR '1'='1")) {
+                res.className = "p-3 rounded-xl text-xs bg-rose-100 text-rose-800 font-bold border border-rose-300";
+                res.innerHTML = "⚠️ 認証回避に成功: 条件式 '1'='1' によりログインが突破されました！";
+            } else {
+                res.className = "p-3 rounded-xl text-xs bg-slate-100 text-slate-700 border border-slate-300";
+                res.innerHTML = "ℹ️ 通常の検証が行われました。";
+            }
+        }
+
+        function runXssDemo(isSafe) {
+            const input = document.getElementById('xss-input').value;
+            const output = document.getElementById('xss-output');
+            if (isSafe) { output.textContent = input; }
+            else { output.innerHTML = input; }
         }
 
         function executeUpload() { alert('アップロード機能'); }
