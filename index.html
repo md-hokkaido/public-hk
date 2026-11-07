@@ -27,7 +27,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* ほわほわ・浮遊アニメーション */
         .float-animation { animation: float 6s ease-in-out infinite; }
         .float-animation-delayed { animation: float 7s ease-in-out 2s infinite; }
         .float-animation-slow { animation: float 9s ease-in-out 1s infinite; }
@@ -106,67 +105,81 @@
         }
 
         /* -------------------------------------- */
-        /* サイバー＆モダン・スタイリッシュ ローダー  */
+        /* 迫り出し ＆ 左右分裂トランジション ローダー */
         /* -------------------------------------- */
         #page-loader {
             position: fixed;
             inset: 0;
             z-index: 99999;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
-            transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: auto;
         }
 
-        #page-loader.loader-hidden {
-            opacity: 0;
-            transform: scale(1.1);
-            pointer-events: none;
+        /* 左右に分割して開く背景パネル */
+        .loader-bg-panel {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
+            transition: transform 0.9s cubic-bezier(0.77, 0, 0.175, 1);
+            z-index: 1;
+        }
+        .loader-bg-left { left: 0; }
+        .loader-bg-right { right: 0; }
+
+        /* 中央のコンテンツ領域 */
+        .loader-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2.5rem;
+            transition: transform 0.8s cubic-bezier(0.7, 0, 0.84, 0), opacity 0.6s ease;
         }
 
         .cyber-logo-wrapper {
             position: relative;
-            width: 110px;
-            height: 110px;
+            width: 120px;
+            height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .cyber-logo-core {
-            width: 76px;
-            height: 76px;
-            border-radius: 1.5rem;
+            width: 84px;
+            height: 84px;
+            border-radius: 1.75rem;
             background: linear-gradient(135deg, #c084fc, #6366f1);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 2rem;
+            font-size: 2.25rem;
             font-weight: 800;
             letter-spacing: -0.05em;
-            box-shadow: 0 0 35px rgba(168, 85, 247, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 40px rgba(168, 85, 247, 0.9), inset 0 0 15px rgba(255, 255, 255, 0.5);
             animation: coreBreath 2s ease-in-out infinite alternate;
         }
 
-        /* 外側のリングアニメーション（正回転） */
         .cyber-ring-outer {
             position: absolute;
             inset: 0;
-            border-radius: 2rem;
+            border-radius: 2.2rem;
             border: 2px solid transparent;
             border-top-color: #a855f7;
             border-right-color: #38bdf8;
             animation: spinClockwise 1.8s linear infinite;
         }
 
-        /* 内側のリングアニメーション（逆回転） */
         .cyber-ring-inner {
             position: absolute;
-            inset: -8px;
-            border-radius: 2.3rem;
+            inset: -10px;
+            border-radius: 2.5rem;
             border: 2px solid transparent;
             border-bottom-color: #f43f5e;
             border-left-color: #818cf8;
@@ -184,14 +197,13 @@
         }
 
         @keyframes coreBreath {
-            0% { transform: scale(0.96); box-shadow: 0 0 25px rgba(168, 85, 247, 0.6); }
-            100% { transform: scale(1.04); box-shadow: 0 0 50px rgba(168, 85, 247, 1), 0 0 20px rgba(56, 189, 248, 0.8); }
+            0% { transform: scale(0.95); box-shadow: 0 0 25px rgba(168, 85, 247, 0.6); }
+            100% { transform: scale(1.05); box-shadow: 0 0 60px rgba(168, 85, 247, 1), 0 0 30px rgba(56, 189, 248, 0.9); }
         }
 
-        /* ネオンラインプログレスバー */
         .neon-bar-bg {
-            width: 160px;
-            height: 3px;
+            width: 180px;
+            height: 4px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 9999px;
             overflow: hidden;
@@ -204,16 +216,35 @@
             width: 0%;
             background: linear-gradient(90deg, #ec4899, #a855f7, #38bdf8);
             border-radius: 9999px;
-            box-shadow: 0 0 12px #38bdf8;
-            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 15px #38bdf8;
+            transition: width 3s cubic-bezier(0.1, 0.85, 0.25, 1);
+        }
+
+        /* アニメーション終了時のクラス */
+        #page-loader.loader-zoom .loader-content {
+            transform: scale(8) translateZ(0);
+            opacity: 0;
+        }
+        #page-loader.loader-split .loader-bg-left {
+            transform: translateX(-100%);
+        }
+        #page-loader.loader-split .loader-bg-right {
+            transform: translateX(100%);
+        }
+        #page-loader.loader-done {
+            display: none;
+            pointer-events: none;
         }
     </style>
 </head>
 <body class="relative min-h-screen pb-16">
 
-    <!-- サイバー＆スタイリッシュ ローディング画面 -->
+    <!-- 迫り出し ＆ 左右分割ローディング画面 -->
     <div id="page-loader">
-        <div class="flex flex-col items-center gap-10">
+        <div class="loader-bg-panel loader-bg-left"></div>
+        <div class="loader-bg-panel loader-bg-right"></div>
+        
+        <div class="loader-content">
             <div class="cyber-logo-wrapper">
                 <div class="cyber-ring-inner"></div>
                 <div class="cyber-ring-outer"></div>
@@ -221,7 +252,6 @@
                     HK
                 </div>
             </div>
-            <!-- プログレスネオンバー -->
             <div class="neon-bar-bg">
                 <div id="neon-bar-fill" class="neon-bar-fill"></div>
             </div>
@@ -614,7 +644,7 @@
         ];
 
         // --------------------------------------
-        // スタイリッシュ・ローダー制御
+        // 迫り出し ＆ 左右分割トランジション制御（約3.5秒）
         // --------------------------------------
         function initPageLoader() {
             const loader = document.getElementById('page-loader');
@@ -622,15 +652,23 @@
 
             if (!loader || !fill) return;
 
-            // スムーズなラインメーターのアニメーション
-            setTimeout(() => { fill.style.width = '45%'; }, 80);
-            setTimeout(() => { fill.style.width = '85%'; }, 350);
-            setTimeout(() => { fill.style.width = '100%'; }, 650);
+            // プログレスバーのアニメーション（3秒間）
+            setTimeout(() => { fill.style.width = '100%'; }, 100);
 
-            // ローダーのフェードアウト ＆ スケールアウト
+            // 約3.2秒後：ロゴが迫り出す（ズームイン）
             setTimeout(() => {
-                loader.classList.add('loader-hidden');
-            }, 850);
+                loader.classList.add('loader-zoom');
+            }, 3200);
+
+            // 約3.4秒後：左右の背景パネルが分割して開く
+            setTimeout(() => {
+                loader.classList.add('loader-split');
+            }, 3400);
+
+            // 約4.3秒後：ローダー要素を非表示
+            setTimeout(() => {
+                loader.classList.add('loader-done');
+            }, 4300);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
