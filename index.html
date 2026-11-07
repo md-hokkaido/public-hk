@@ -105,7 +105,7 @@
         }
 
         /* -------------------------------------- */
-        /* 縦分割線完全削除 ＆ 極上ふわっとローダー */
+        /* 継ぎ目・縦線を完全排除した極上ローダー   */
         /* -------------------------------------- */
         #page-loader {
             position: fixed;
@@ -119,23 +119,25 @@
             transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        /* 左右パネル（幅52%＋オーバーラップ＋マージン補正で中央の線・隙間を完全排除） */
+        /* 背景：ページ本体と全く同じシームレスなグラデーションを保持したままカーテンのように割れるパネル */
         .loader-bg-panel {
             position: absolute;
-            top: -5vh;
-            bottom: -5vh;
-            width: 52%;
-            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 50%, #fbc2eb 100%);
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            background: linear-gradient(-45deg, #e0c3fc, #8ec5fc, #e0c3fc, #fbc2eb);
+            background-size: 400% 400%;
+            background-attachment: fixed; /* ページ背景と完全に同期 */
             transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1);
             z-index: 1;
         }
         .loader-bg-left { 
             left: 0; 
-            margin-right: -10px;
+            background-position: left center;
         }
         .loader-bg-right { 
             right: 0; 
-            margin-left: -10px;
+            background-position: right center;
         }
 
         /* 中央のコンテンツ領域 */
@@ -236,11 +238,11 @@
             filter: blur(10px);
         }
         #page-loader.loader-split .loader-bg-left {
-            transform: translateX(-105%);
+            transform: translateX(-100%);
             opacity: 0;
         }
         #page-loader.loader-split .loader-bg-right {
-            transform: translateX(105%);
+            transform: translateX(100%);
             opacity: 0;
         }
         #page-loader.loader-done {
@@ -947,7 +949,7 @@
                 else renderRolesList();
                 showToast('認証成功', 'Control Centerへアクセスしました。', 'success');
             } else {
-                err.classList.remove('hidden');
+                err.classList.add('hidden');
             }
         }
 
