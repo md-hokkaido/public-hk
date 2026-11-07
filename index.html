@@ -113,7 +113,7 @@
     <!-- ヘッダー -->
     <header class="sticky top-0 z-50 glass-nav px-4 lg:px-8 py-3 mb-4 shadow-sm">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home')">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('home', true)">
                 <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center text-white font-bold text-xl shadow-md float-animation">
                     HK
                 </div>
@@ -127,20 +127,20 @@
 
             <!-- ナビゲーションメニュー -->
             <nav id="main-nav" class="flex flex-wrap items-center justify-center gap-1 sm:gap-2">
-                <button onclick="switchTab('home')" id="nav-home" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 bg-purple-500 text-white shadow-sm">
+                <button onclick="switchTab('home', true)" id="nav-home" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 bg-purple-500 text-white shadow-sm">
                     <i data-lucide="home" class="w-4 h-4"></i> ホーム
                 </button>
-                <button onclick="switchTab('files')" id="nav-files" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-600 hover:bg-white/60">
+                <button onclick="switchTab('files', true)" id="nav-files" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-600 hover:bg-white/60">
                     <i data-lucide="file-text" class="w-4 h-4"></i> ファイル受け渡し
                 </button>
-                <button onclick="switchTab('news')" id="nav-news" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-600 hover:bg-white/60">
+                <button onclick="switchTab('news', true)" id="nav-news" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-600 hover:bg-white/60">
                     <i data-lucide="bell" class="w-4 h-4"></i> お知らせ
                 </button>
-                <button onclick="switchTab('security')" id="nav-security" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-600 hover:bg-white/60">
+                <button onclick="switchTab('security', true)" id="nav-security" class="nav-btn px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-600 hover:bg-white/60">
                     <i data-lucide="shield-check" class="w-4 h-4"></i> セキュリティ学習
                 </button>
                 <!-- ロール管理タブ (管理者ログイン時のみ表示) -->
-                <button onclick="switchTab('roles')" id="nav-roles" class="nav-btn hidden px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-600 hover:bg-white/60">
+                <button onclick="switchTab('roles', true)" id="nav-roles" class="nav-btn hidden px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-600 hover:bg-white/60">
                     <i data-lucide="users" class="w-4 h-4 text-purple-600"></i> ロール管理
                 </button>
                 <!-- ユーザー管理タブ (管理者ログイン時のみ表示) -->
@@ -160,12 +160,12 @@
         </div>
     </header>
 
-    <!-- すべてのページ（タブ）に現在のURLを表示するバー -->
+    <!-- 現在の個別URL表示バー -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 relative z-10">
         <div class="bg-white/60 backdrop-blur-md px-4 py-2 rounded-xl border border-white/80 shadow-sm flex items-center gap-2 text-xs text-slate-600 font-mono">
             <i data-lucide="globe" class="w-3.5 h-3.5 text-purple-600"></i>
-            <span class="font-bold text-slate-700">Current URL:</span>
-            <span id="current-url-display" class="text-purple-700 select-all">https://public-hk.md-hokkaido.com/#home</span>
+            <span class="font-bold text-slate-700">Current Assigned URL:</span>
+            <span id="current-url-display" class="text-purple-700 select-all font-bold">https://public-hk.md-hokkaido.com/home</span>
         </div>
     </div>
 
@@ -194,7 +194,7 @@
                     <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
                         <i data-lucide="megaphone" class="text-amber-500"></i> 最新のお知らせ一覧
                     </h3>
-                    <button onclick="switchTab('news')" class="text-xs font-bold text-purple-600 hover:underline">すべて見る →</button>
+                    <button onclick="switchTab('news', true)" class="text-xs font-bold text-purple-600 hover:underline">すべて見る →</button>
                 </div>
                 <div id="home-news-preview" class="space-y-3">
                     <!-- JS描画 -->
@@ -203,7 +203,7 @@
 
             <!-- ログイン後に表示される機能ショートカットカード群 -->
             <div id="home-feature-cards" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div onclick="switchTab('files')" class="glass-card p-6 cursor-pointer group float-animation">
+                <div onclick="switchTab('files', true)" class="glass-card p-6 cursor-pointer group float-animation">
                     <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition">
                         <i data-lucide="cloud-cog" class="w-6 h-6"></i>
                     </div>
@@ -211,7 +211,7 @@
                     <p class="text-xs text-slate-500">Google Drive連携による安全なファイル保存・共有</p>
                 </div>
 
-                <div onclick="switchTab('news')" class="glass-card p-6 cursor-pointer group float-animation-delayed">
+                <div onclick="switchTab('news', true)" class="glass-card p-6 cursor-pointer group float-animation-delayed">
                     <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mb-4 group-hover:scale-110 transition">
                         <i data-lucide="megaphone" class="w-6 h-6"></i>
                     </div>
@@ -219,7 +219,7 @@
                     <p class="text-xs text-slate-500">最新情報・連絡事項の確認と作成・編集</p>
                 </div>
 
-                <div onclick="switchTab('security')" class="glass-card p-6 cursor-pointer group float-animation-slow">
+                <div onclick="switchTab('security', true)" class="glass-card p-6 cursor-pointer group float-animation-slow">
                     <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-4 group-hover:scale-110 transition">
                         <i data-lucide="shield-alert" class="w-6 h-6"></i>
                     </div>
@@ -327,7 +327,7 @@
             </div>
         </section>
 
-        <!-- ROLES MANAGEMENT (ロール管理ページ) -->
+        <!-- ROLES MANAGEMENT -->
         <section id="tab-roles" class="page-tab space-y-6">
             <div class="glass-card p-6 md:p-8 space-y-6">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/60 pb-4">
@@ -459,7 +459,7 @@
         </div>
     </div>
 
-    <!-- 管理者パスワード入力モーダル (誤認識防止属性付与) -->
+    <!-- 管理者パスワード入力モーダル -->
     <div id="admin-pass-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="glass-card max-w-md w-full p-6 space-y-6 bg-white/90">
             <div class="flex items-center justify-between">
@@ -468,7 +468,6 @@
             </div>
             <p class="text-xs text-slate-600">管理者ページにアクセスするにはパスワードを入力してください。</p>
             <form onsubmit="verifyAdminPassword(event)" class="space-y-4">
-                <!-- パスワードマネージャーによる「パスワードの作成」誤認を防ぐため type="text" かつ autocomplete/name属性を調整 -->
                 <input type="text" id="admin-secret-pass" autocomplete="off" name="admin_verification_code" data-lpignore="true" required placeholder="パスワードを入力" class="w-full text-sm p-3 rounded-xl glass-input">
                 <div id="admin-pass-error" class="text-xs text-rose-600 font-bold hidden">パスワードが正しくありません</div>
                 <button type="submit" class="w-full py-3 rounded-xl bg-purple-600 text-white font-bold text-sm">認証する</button>
@@ -516,23 +515,20 @@
         </div>
     </div>
 
-    <!-- スクリプト -->
+    <!-- スクリプト (History API ルーティング対応) -->
     <script>
         let currentUser = null;
 
-        // ロール定義データ
         let rolesList = JSON.parse(localStorage.getItem('hk_portal_roles')) || [
             { id: 'admin', name: 'システム管理者', desc: '全設定の変更、ユーザー管理、お知らせの全権限' },
             { id: 'editor', name: 'お知らせエディター', desc: 'お知らせの追加・編集・削除ができる権限' },
             { id: 'general', name: '一般ユーザー', desc: '通常の閲覧およびファイル共有権限' }
         ];
 
-        // 登録ユーザーデータ (rolesは複数選択可能な配列)
         let registeredUsers = JSON.parse(localStorage.getItem('hk_portal_users')) || [
             { adminId: 'ADM-001', sei: 'システム', mei: '管理者', username: 'admin', password: 'Admin1234', roles: ['admin'], neverLock: true, failedAttempts: 0, isLocked: false }
         ];
 
-        // お知らせデータ
         let newsList = JSON.parse(localStorage.getItem('hk_portal_news')) || [
             { id: 1, title: 'HK - Portal をセキュリティ強化版で公開しました', date: '2026-11-07', category: '重要', author: 'システム管理者', content: '新しいポータルサイトへようこそ。厳格な認証とロール管理が有効になっています。' }
         ];
@@ -542,7 +538,15 @@
             updateAuthUI();
             renderNewsList();
             renderRolesList();
-            updateCurrentUrlDisplay('home');
+
+            // 初期ロード時のURLパス（例: /files や /news）を解析して対応するタブを開く
+            handleInitialRoute();
+
+            // ブラウザの「戻る」「進む」ボタンに対応
+            window.addEventListener('popstate', (event) => {
+                const path = window.location.pathname.replace('/', '') || 'home';
+                switchTab(path, false);
+            });
         });
 
         function saveStorage() {
@@ -551,28 +555,41 @@
             localStorage.setItem('hk_portal_roles', JSON.stringify(rolesList));
         }
 
-        // タブ切り替え時にURL表示も連動して更新
-        function switchTab(tabId) {
+        // History APIを用いたルーティング切替関数
+        function switchTab(tabId, updateHistory = true) {
+            const validTabs = ['home', 'files', 'news', 'security', 'roles', 'admin'];
+            const targetTab = validTabs.includes(tabId) ? tabId : 'home';
+
             document.querySelectorAll('.page-tab').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('bg-purple-500', 'text-white', 'shadow-sm'));
 
-            const activeTab = document.getElementById(`tab-${tabId}`);
+            const activeTab = document.getElementById(`tab-${targetTab}`);
             if (activeTab) activeTab.classList.add('active');
 
-            const activeNav = document.getElementById(`nav-${tabId}`);
+            const activeNav = document.getElementById(`nav-${targetTab}`);
             if (activeNav) activeNav.classList.add('bg-purple-500', 'text-white', 'shadow-sm');
 
-            updateCurrentUrlDisplay(tabId);
+            // ブラウザのURLバーを更新 (例: https://public-hk.md-hokkaido.com/files)
+            if (updateHistory) {
+                const newPath = `/${targetTab === 'home' ? '' : targetTab}`;
+                history.pushState({ tab: targetTab }, '', newPath);
+            }
+
+            // 画面上のURL表示バーもリアルタイムに更新
+            const fullUrl = `https://public-hk.md-hokkaido.com/${targetTab === 'home' ? 'home' : targetTab}`;
+            const urlDisplay = document.getElementById('current-url-display');
+            if (urlDisplay) urlDisplay.textContent = fullUrl;
         }
 
-        function updateCurrentUrlDisplay(tabId) {
-            const urlDisplay = document.getElementById('current-url-display');
-            if (urlDisplay) {
-                urlDisplay.textContent = `https://public-hk.md-hokkaido.com/#${tabId}`;
+        function handleInitialRoute() {
+            const path = window.location.pathname.replace('/', '').toLowerCase();
+            if (path && ['home', 'files', 'news', 'security', 'roles', 'admin'].includes(path)) {
+                switchTab(path, false);
+            } else {
+                switchTab('home', false);
             }
         }
 
-        // 画面中央の派手なウェルカムポップアップを表示
         function showCenterWelcomeModal(name) {
             const modal = document.getElementById('center-welcome-modal');
             document.getElementById('welcome-modal-title').textContent = `ようこそ、${name} さん！`;
@@ -595,7 +612,6 @@
         }
         function closeLoginModal() { document.getElementById('login-modal').classList.add('hidden'); }
 
-        // ログイン処理
         function handleLogin(e) {
             e.preventDefault();
             const usernameInput = document.getElementById('login-user').value.trim();
@@ -642,7 +658,7 @@
         function handleLogout() {
             currentUser = null;
             updateAuthUI();
-            switchTab('home');
+            switchTab('home', true);
         }
 
         function hasRole(user, roleId) {
@@ -667,10 +683,10 @@
                 authBtn.onclick = handleLogout;
                 
                 featureCards.classList.remove('hidden');
-                homeNewsSection.classList.remove('hidden'); // ログイン時はお知らせを表示
+                homeNewsSection.classList.remove('hidden');
                 homeSubtitle.textContent = 'ログイン中のアカウントですべての機能・ファイル共有・お知らせを利用可能です。';
 
-                // 管理者権限（neverLock または adminロール）の場合のみ管理系タブを表示
+                // 管理者権限の場合のみ表示
                 if (currentUser.neverLock || hasRole(currentUser, 'admin')) {
                     navAdmin.classList.remove('hidden');
                     navRoles.classList.remove('hidden');
@@ -679,7 +695,6 @@
                     navRoles.classList.add('hidden');
                 }
 
-                // お知らせ追加権限（admin, editor または neverLock）
                 if (hasRole(currentUser, 'admin') || hasRole(currentUser, 'editor') || currentUser.neverLock) {
                     addNewsBtn.classList.remove('hidden');
                 } else {
@@ -691,7 +706,7 @@
                 authBtn.onclick = openLoginModal;
 
                 featureCards.classList.add('hidden');
-                homeNewsSection.classList.add('hidden'); // Guestの時は非表示
+                homeNewsSection.classList.add('hidden');
                 homeSubtitle.textContent = '現在ゲスト閲覧中です。すべての機能を利用するにはログインしてください。';
                 navAdmin.classList.add('hidden');
                 navRoles.classList.add('hidden');
@@ -700,7 +715,6 @@
             renderNewsList();
         }
 
-        // 管理者ページアクセス制御
         function requestAdminAccess() {
             const passInput = document.getElementById('admin-secret-pass');
             passInput.value = '';
@@ -715,7 +729,7 @@
             const err = document.getElementById('admin-pass-error');
             if (pass === 'sN7VhCCF') {
                 closeAdminPassModal();
-                switchTab('admin');
+                switchTab('admin', true);
                 renderAdminUserList();
             } else {
                 err.classList.remove('hidden');
@@ -727,7 +741,6 @@
             return regex.test(pass);
         }
 
-        // 個別ユーザー登録（デフォルトで一般ロール付与）
         function handleRegisterUser(e) {
             e.preventDefault();
             const adminId = document.getElementById('reg-admin-id').value.trim();
@@ -756,14 +769,12 @@
             renderAdminUserList();
         }
 
-        // ユーザー一覧表示（ロール複数選択チェックボックス対応）
         function renderAdminUserList() {
             const tbody = document.getElementById('admin-user-list-tbody');
             tbody.innerHTML = '';
             registeredUsers.forEach((user, index) => {
                 if (!user.roles) user.roles = [user.role || 'general'];
 
-                // 複数選択用のチェックボックス群を生成
                 let rolesCheckboxes = '<div class="flex flex-wrap gap-2">';
                 rolesList.forEach(r => {
                     const checked = user.roles.includes(r.id) ? 'checked' : '';
@@ -792,7 +803,6 @@
             lucide.createIcons();
         }
 
-        // ロールの複数選択更新
         function updateUserRoles(index, checkbox) {
             const roleId = checkbox.value;
             if (!registeredUsers[index].roles) {
@@ -892,7 +902,6 @@
             reader.readAsText(file);
         }
 
-        // お知らせ機能関連 (Guest時は非表示、ログイン時は表示＆権限に応じた追加・編集)
         function renderNewsList() {
             const container = document.getElementById('news-container');
             const homePreview = document.getElementById('home-news-preview');
@@ -987,7 +996,6 @@
             }
         }
 
-        // ロール管理ページ関連
         function renderRolesList() {
             const grid = document.getElementById('roles-grid');
             grid.innerHTML = '';
@@ -1018,7 +1026,6 @@
             alert('新しいロールを作成しました。');
         }
 
-        // セキュリティ学習デモ機能
         function runSqliDemo() {
             const u = document.getElementById('sqli-input-user').value;
             const res = document.getElementById('sqli-result');
