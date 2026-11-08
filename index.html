@@ -410,7 +410,7 @@
             </div>
         </section>
 
-        <!-- FILES (ファイル選択機能追加版) -->
+        <!-- FILES (Google Drive連携 ＆ ファイル選択対応) -->
         <section id="tab-files" class="page-tab space-y-6">
             <div class="glass-card p-6 md:p-8">
                 <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2 mb-4">
@@ -475,7 +475,7 @@
             </div>
         </section>
 
-        <!-- ROLES MANAGEMENT (無権限アクセスの防御付き) -->
+        <!-- ROLES MANAGEMENT -->
         <section id="tab-roles" class="page-tab space-y-6">
             <div id="roles-access-denied" class="glass-card p-12 text-center hidden">
                 <div class="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">🔒</div>
@@ -492,7 +492,7 @@
             </div>
         </section>
 
-        <!-- ADMIN USER MANAGEMENT (無権限アクセスの防御付き) -->
+        <!-- ADMIN USER MANAGEMENT -->
         <section id="tab-admin" class="page-tab space-y-6">
             <div id="admin-access-denied" class="glass-card p-12 text-center hidden">
                 <div class="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">🔒</div>
@@ -734,7 +734,7 @@
         });
 
         /* -------------------------------------- */
-        /* ファイル選択 ＆ アップロード制御機能 */
+        /* ファイル選択 ＆ Google Driveアップロード連携 */
         /* -------------------------------------- */
         function handleFileSelected(input) {
             if (input.files && input.files[0]) {
@@ -749,16 +749,82 @@
             }
         }
 
-        function executeUpload() {
+        async function executeUpload() {
             if (!selectedFile) {
                 showToast('エラー', 'アップロードするファイルが選択されていません。', 'error');
                 return;
             }
-            showToast('送信完了', `${selectedFile.name} のGoogle Drive受け渡し処理が完了しました。`, 'success');
-            selectedFile = null;
-            document.getElementById('actual-file-input').value = '';
-            document.getElementById('selected-file-name').classList.add('hidden');
-            document.getElementById('upload-zone-text').textContent = 'クリックしてファイルを選択（Google Driveへ送信）';
+
+            const gasWebAppUrl = "https://script.google.com/macros/s/AKfycbz_cilGk63L_zLfo390T9w4JpLF_m9S3luwTGkaC8VQspPj0ztOkBAS4Ur7PDBroUZP0w/exec"; // ★作成したGASのURLに書き換えてください
+
+            showToast('送信中', 'Google Driveへアップロードしています...', 'success');
+
+            const reader = new FileReader();
+            reader.readAsDataURL(selectedFile);
+            reader.onload = async function () {
+                const base64Data = reader.result.split(',')[1];
+                
+                const payload = {
+                    fileName: selectedFile.name,
+                    mimeType: selectedFile.type || 'application/octet-stream',
+                    fileData: base64Data
+                };
+
+                try {
+                    const response = await fetch(gasWebAppUrl, {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        showToast('送信完了', `${result.fileName} をGoogle Driveへ保存しました！`, 'success');
+                        
+                        // アップロード済みファイルを画面にリスト表示
+                        addFileToList(result.fileName, result.fileUrl);
+
+                        // 選択状態のリセット
+                        selectedFile = null;
+                        document.getElementById('actual-file-input').value = '';
+                        document.getElementById('selected-file-name').classList.add('hidden');
+                        document.getElementById('upload-zone-text').textContent = 'クリックしてファイルを選択（Google Driveへ送信）';
+                    } else {
+                        showToast('エラー', 'アップロード失敗: ' + result.message, 'error');
+                    }
+                } catch (err) {
+                    showToast('エラー', '通信エラーまたはURLが未設定です。', 'error');
+                    console.error(err);
+                }
+            };
+        }
+
+        function addFileToList(name, url) {
+            let container = document.getElementById('uploaded-files-list');
+            if (!container) {
+                const filesSection = document.getElementById('tab-files').querySelector('.glass-card');
+                const listWrapper = document.createElement('div');
+                listWrapper.className = 'mt-6 pt-6 border-t border-slate-200/60 space-y-3';
+                listWrapper.innerHTML = `
+                    <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
+                        <i data-lucide="file-check" class="text-emerald-500"></i> アップロード済みファイル一覧
+                    </h3>
+                    <div id="uploaded-files-list" class="space-y-2"></div>
+                `;
+                filesSection.appendChild(listWrapper);
+                container = document.getElementById('uploaded-files-list');
+            }
+
+            const item = document.createElement('div');
+            item.className = 'p-3 rounded-xl bg-white/80 border border-slate-200 flex items-center justify-between text-xs';
+            item.innerHTML = `
+                <span class="font-semibold text-slate-700 font-mono">${name}</span>
+                <a href="${url}" target="_blank" rel="noopener noreferrer" class="px-3 py-1 bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold rounded-lg transition">
+                    Driveで開く ↗
+                </a>
+            `;
+            container.appendChild(item);
+            lucide.createIcons();
         }
 
         function enforceHalfWidth(e) {
